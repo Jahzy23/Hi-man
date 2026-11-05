@@ -15,7 +15,7 @@ import requests
 import stripe
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "9177827056:AAFn_21ShAxm5ZS1TjUIlDcBPLXi8CO66rI")
-STRIPE_SK = os.environ.get("STRIPE_SK", "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")
+STRIPE_SK = os.environ.get("STRIPE_SK", "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")
 
 API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 OFFSET = 0
