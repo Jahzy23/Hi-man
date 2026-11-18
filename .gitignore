@@ -8,3 +8,4 @@ quant/bot/logs/
 .pytest_cache/
 .coverage
 htmlcov/
+*.pkl
