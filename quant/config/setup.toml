@@ -1,0 +1,53 @@
+# ---------------------------------------------------------------------------
+# The ONE file that selects everything the bot does.  Swapping setups = editing
+# this file, then `bot/run.sh restart`.  Parsed by bot/config.py (tomllib).
+# ---------------------------------------------------------------------------
+mode = "paper"                       # only "paper" is accepted by this build
+symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+
+[account]                            # every setup below gets its OWN paper book with this equity
+equity = 1000.0
+risk_per_trade = 0.005               # 0.5% of book equity per trade
+max_leverage = 3.0                   # per-position notional cap AND per-book gross cap (Shield)
+
+[fees]                               # SPEC: maker 0.02%, taker 0.05%
+maker = 0.0002
+taker = 0.0005
+
+[slippage]                           # SPEC: 1 bp BTC/ETH, 2 bp SOL; stop exits 2x
+stop_multiplier = 2.0
+[slippage.bps]
+BTCUSDT = 1.0
+ETHUSDT = 1.0
+SOLUSDT = 2.0
+
+[shield]
+daily_loss_pct = 0.03                # halt a book at day P&L <= -3% of its start-of-UTC-day equity
+max_consecutive_losses = 3           # halt a book after 3 straight losing trades (human must clear)
+stale_feed_s = 60                    # halt everything when any symbol's book tick is older than this
+stale_clear_s = 300                  # stale halt auto-clears after the feed has been healthy this long
+max_clock_skew_s = 5                 # exchange event time ahead of local clock / time running backwards
+max_tick_age_s = 10                  # an order needs a quote at least this fresh
+max_decision_delay_s = 30            # entries are blocked if the bar closed longer ago than this
+
+[engine]
+heartbeat_s = 300
+default_warmup_bars = 300            # used when a strategy module has no WARMUP_BARS attribute
+archive_refresh_min = 30             # how often to retry data.binance.vision while a history gap exists
+bar_close_grace_s = 15               # wait this long for every symbol's bar before deciding without it
+
+# ---------------------------------------------------------------------------
+# Active setups.  The first one with role = "leader" is the candidate for live;
+# the others are runners-up traded as separate paper books for comparison.
+# `strategy` is a module name in strategies/ (SPEC interface).  `params`
+# overrides the module's DEFAULT_PARAMS key by key.  `symbols` is optional.
+#
+# PLACEHOLDER: _reference_breakout is Forge's test strategy, not a chosen setup.
+# Replace this block once Radar/Lab have picked the leader and runners-up.
+# ---------------------------------------------------------------------------
+[[setup]]
+id = "leader"
+role = "leader"
+strategy = "_reference_breakout"
+[setup.params]
+lookback = 24

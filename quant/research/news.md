@@ -1,0 +1,96 @@
+# Crypto market news scan - 2026-11-18
+
+Scan run 2026-11-18 (UTC) by Radar. Price data used for cross-checks ends 2026-11-18 00:00 UTC
+(Binance USDT-M perps, `strategies.data.load`).
+
+## How far to trust this file
+
+- **Method:** web search only. I could read result titles, URLs and the search engine's snippets.
+- **I could not open any article.** Page fetches failed because the hosts are outside this session's
+  allowed network domains (`www.fool.com` and `investinglive.com` were tried and refused; I stopped there).
+  So every figure below is "as reported in the search snippet", not checked against the article body.
+- **Dates:** an item is listed as dated only if the date is in the URL or stated in the snippet.
+  Everything else is in the "undated" section and should be treated as colour.
+- Where a headline quotes a BTC price, I checked it against our own candles. That check is the only
+  independent verification in this file.
+- Influencer calls, paid signal groups, price targets and "how low can it go" pieces were ignored.
+  The reasons given for price moves are commentators' explanations, not established facts.
+- Nothing here feeds any setup. It is context for the humans and for Shield's event calendar.
+
+## Dated items
+
+| date (UTC) | what was reported | source | cross-check against our data |
+|---|---|---|---|
+| 2026-11-18 | Headline: "Bitcoin Price Forecast: BTC stalls as ETF outflows mount ahead of Fed Minutes". Only two facts are taken from it: ETF outflows are still being reported, and the Fed's meeting minutes were still to be released. The forecast part is ignored. | [FXStreet, URL stamp 2026-11-18 07:58](https://www.fxstreet.com/cryptocurrencies/news/bitcoin-price-forecast-btc-stalls-as-etf-outflows-mount-ahead-of-fed-minutes-202611180758) | Last close 64,921.0 (bar closing 2026-11-18 00:00). "Stalls" fits: daily closes 64,130 / 65,310 / 64,856 / 64,921 for Nov 14-17. |
+| 2026-11-16 | Headline: "BTC Slides Toward $62K Amid Persistent ETF Outflows and Extreme Fear". | [The Crypto Times, 2026-11-16](https://www.cryptotimes.io/2026/11/16/bitcoin-price-today-btc-slides-toward-62k-amid-persistent-etf-outflows-and-extreme-fear/) | Confirmed: BTCUSDT perp low 61,956.3 in the bar opening 2026-11-15 01:00 UTC. ETH low 1,710.01 and SOL low 67.35 in the same hour. |
+| 2026-11-14 | US spot bitcoin ETFs: net outflow of $1.07bn last week, the second week in a row above $1bn; $1.91bn drained since the streak began on Nov 5; $2.35bn out in November after nine trading days, the largest monthly outflow since June; about -$1.98bn for 2026 so far. Ether ETFs about -$804.5m for 2026. Data attributed to SoSoValue. | [The Block, 2026-11-14](https://theblock.co/news/markets/2026-11-14-bitcoin-etfs-lose-1-billion-for-the-second-week-in-a-row-as-crypto-funds-except-one-continue-bleeding-440337) | Flows cannot be checked from our data. Price: BTC closed 78,313 on Nov 1 and 64,131 on Nov 14 (-18.1%). |
+| 2026-11-13 | Headline: "Why Bitcoin is falling today" (headline only; the search summary names inflation data and hawkish Fed signals as the reasons cited). | [The Motley Fool, 2026-11-13](https://www.fool.com/investing/2026/11/13/why-bitcoin-is-falling-today/) | Confirmed: the UTC day 2026-11-13 closed at 68,279.8, the first daily close below 70,000 since 2026-08-19, and the next day fell a further 6.1%. |
+| 2026-11-10 (event date; publication date not shown) | October US CPI released Nov 10: headline +0.4% m/m, core +0.3% for a third month. CME FedWatch snapshot of Nov 10: 86.4% for a 25bp hike and 13.6% for a 50bp hike in December (50bp was 0% before). Fed decision on Dec 9; the next CPI comes on Dec 10, after the decision. Fed funds target range 3.75-4.00%. BTC "intraday low below $73,000". | [CryptoSlate](https://cryptoslate.com/bitcoin-holds-73000-as-odds-of-a-december-50-bps-rate-hike-jump/); same event: [Decrypt](https://decrypt.co/382950/bitcoin-falls-hot-us-inflation-fears-bigger-fed-rate-hike?amp=1) | Confirmed for price: BTC low 72,691.0 on the UTC day 2026-11-10. Macro numbers not verifiable here. |
+| 2026-11-07 | Headline: "Bitcoin ETFs flip negative for 2026 after $1.28 billion outflow week, worst since June". | [The Block, 2026-11-07](https://theblock.co/news/markets/2026-11-07-bitcoin-etfs-flip-negative-for-2026-after-1-28-billion-outflow-week-worst-since-june-435984) | Not checkable. BTC closed 75,836 on Nov 7. |
+| 2026-10-10 (background, over a month old) | US spot ether ETFs: $542.1m weekly net outflow and a nine-day outflow streak; Solana funds ended a 14-week inflow run with $24.8m out. | [The Block, 2026-10-10](https://www.theblock.co/news/markets/2026-10-10-ether-etfs-extend-outflow-streak-as-solana-funds-snap-record-14-week-inflow-run-418215) | Not checkable. Included only to show ETH/SOL fund flows turned before BTC's did. |
+
+## Undated or weakly dated (colour only, do not rely on)
+
+These came back for November 2026 queries and match our price levels, but no date is visible in the result.
+
+| what the result says | source | note |
+|---|---|---|
+| "Bitcoin muted at $64.4k as crypto sentiment dithers, ETF outflows persist" | [Yahoo Finance SG](https://sg.finance.yahoo.com/news/bitcoin-pinned-below-65k-crypto-061112106.html) | Level matches Nov 16-17 closes in our data. |
+| "Bitcoin price stuck below $65,000 as ETF outflows and bearish signals persist" | [crypto.news](https://crypto.news/bitcoin-price-stuck-below-65000-as-etf-outflows-and-bearish-signals-persist/) | Same level. |
+| "Bitcoin price ahead of the Fed minutes: fear index at 11"; "Bitcoin falls on Fed hike bets and $1.07bn ETF outflows" | [cryptoticker.io](https://cryptoticker.io/en/bitcoin-price-fed-minutes-extreme-fear/), [cryptoticker.io](https://cryptoticker.io/en/bitcoin-falls-fed-hike-bets-etf-outflows-stablecoins/) | A sentiment index reading; no methodology or date visible. |
+| "Bitcoin Drops to $62K Amid $2.35 Billion ETF Outflows in November" | [KuCoin news flash](https://www.kucoin.com/news/flash/bitcoin-drops-to-62k-amid-2-35-billion-etf-outflows-in-november) | Repeats The Block's $2.35bn figure. Exchange-run news feed. |
+| "Bitcoin dipped under $70K, first time since August" | [investingLive](https://investinglive.com/cryptocurrency/bitcoin-dipped-under-70k-first-time-since-august/) | Our data dates that to 2026-11-13. |
+| "Bitcoin consolidates near recent lows as hawkish Fed repricing weighs on the crypto market" | [investingLive](https://investinglive.com/cryptocurrency/bitcoin-consolidates-near-recent-lows-as-hawkish-fed-repricing-weighs-on-the-crypto-market/) | Same story. |
+| About $1.91bn left bitcoin ETFs over seven straight sessions through Nov 13 | [aktualita.co](https://aktualita.co/en/economy/bitcoin-price-remains-under-pressure-us19-billion-exits-etfs-as-investors-await-fed-decision) | Secondary source repeating the SoSoValue figure. |
+| FOMC meets Dec 8-9, 2026 | [ifyouspent news](https://news.ifyouspent.com/en/news/fed-december-2026-meeting-jobs-cpi-what-to-watch) | Secondary source; agrees with the CryptoSlate snippet. Not checked against federalreserve.gov. |
+
+## Looked for and did not find
+
+- Any November 2026 Binance notice changing margin tiers, funding interval or trading rules for
+  BTCUSDT / ETHUSDT / SOLUSDT USDT-M perps, or an outage. The search only returned unrelated listings
+  (HYPEUSDC and TRXUSDC perps on Nov 11, e.g. [hokanews](https://www.hokanews.com/2026/11/binance-to-launch-hypeusdc-and-trxusdc.html)).
+  Absence of a search hit is not proof that nothing changed: check Binance's announcement page directly.
+- A dated liquidation total for the Nov 13-15 drop. None found, so none is quoted.
+- ETH- or SOL-specific news for this week. The search returned only older material. Fund-flow numbers for
+  ether and Solana ETFs on Nov 9-12 appeared in a search summary without a source I could pin down, so
+  they are left out.
+- CoinShares' weekly fund-flow report for the week ending Nov 13/14. Not found.
+
+## Thrown out on purpose
+
+- **Look-alike stories from November 2025.** Searches for "bitcoin November bear market" return a wave of
+  2025 pieces ("Bitcoin erases year's gain", $93K, a $3.5bn November ETF outflow, record at about $126k in
+  October 2025). Same month, different year. None of it is used.
+- Earlier 2026 events that still rank in search (the new Fed chair's nomination, confirmation and first
+  meeting, a Jackson Hole speech, earlier liquidation waves at higher prices).
+- Price forecasts, targets, technical-analysis calls, "fear and greed" as a trading signal.
+
+## Reading for the desk (risk view)
+
+1. **One story, three markets.** Every source tells the same thing: US inflation came in hot on Nov 10,
+   the market priced a Fed hike for Dec 9, and US spot ETFs have been net sellers since Nov 5. A single
+   macro driver is why BTC, ETH and SOL all carry the same regime label in `market_ranking.md`.
+   Holding the same setup on all three is one position, not three.
+2. **Known-time event risk ahead:** the Fed minutes (still pending per the Nov 18 headline; release time
+   not verified here), the Fed decision on Dec 9 and US CPI on Dec 10 (both per the CryptoSlate snippet).
+   Shield should treat these as scheduled volatility. The session-open setups will fire on such days by
+   construction.
+3. **Flows are the reported driver, and we cannot see them.** ETF flow data is not in our dataset and
+   arrives a day late in the press. No setup uses it.
+4. **Funding and liquidations for this sell-off are unknown to us.** The funding archive stops on
+   2026-10-31 and Binance does not publish liquidation history. Any claim about "capitulation" would be a guess.
+5. The news does not change any hypothesis in `ideas.md` and was not used to pick or tune any setup.
+
+## Search log
+
+Queries run on 2026-11-18: "crypto market news bitcoin price November 17 2026"; "bitcoin ethereum solana
+market liquidations ETF flows this week November 2026"; "bitcoin erases year's gain crypto bear market
+deepens November 2026"; "spot bitcoin ETF outflows Fed rate hawkish crypto November 2026"; "ethereum solana
+price news week of November 16 2026"; "Bitcoin ETFs lose $1 billion second week in a row theblock November
+14 2026"; "Warsh Fed rate hike December bitcoin falls below $65,000 liquidations"; "CoinShares weekly
+digital asset fund flows report November 16 2026"; "bitcoin price today November 17 2026 six-month low ETF
+outflows hawkish Fed"; "FOMC meeting December 2026 dates CME FedWatch rate hike probability November 2026";
+"ether ETF outflows Solana ETF flows November 2026 theblock"; "US CPI report November 10 2026 bitcoin
+reaction Fed rate hike December pricing"; "Binance futures announcement November 2026 USDT-M perpetual
+margin tiers funding rate change outage"; "FXStreet ahead of Fed Minutes bitcoin ETF outflows November 18
+2026 ethereum solana price forecast".

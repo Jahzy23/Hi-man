@@ -26,7 +26,9 @@ def load(sym: str, tf: str = "1h") -> pd.DataFrame:
     k["funding_rate"] = fr.reindex(fr.index.union(close_t)).ffill().reindex(close_t).values
     oo = o[["sum_open_interest", "sum_open_interest_value", "sum_toptrader_long_short_ratio",
             "count_long_short_ratio", "sum_taker_long_short_vol_ratio"]]
-    oo = oo.reindex(close_t).ffill(limit=3)
+    oo = oo.reindex(close_t)
+    oo = oo.mask(oo["sum_open_interest"] <= 0)   # archive prints OI=0 on a few hours: treat as missing
+    oo = oo.ffill(limit=3)
     k["oi"] = oo["sum_open_interest"].values
     k["oi_value"] = oo["sum_open_interest_value"].values
     k["top_ls_ratio"] = oo["sum_toptrader_long_short_ratio"].values
