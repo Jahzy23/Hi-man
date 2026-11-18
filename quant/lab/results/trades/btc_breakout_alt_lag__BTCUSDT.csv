@@ -1,0 +1,1 @@
+signal_time,entry_time,exit_time,side,entry_type,qty,entry_ref,entry_price,exit_ref,exit_price,stop,target,notional,leverage,equity_at_entry,risk_usd,gross,fees,slippage,funding,net,ret,R,exit_reason,bars_held,entry_bar,exit_bar

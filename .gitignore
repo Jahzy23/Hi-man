@@ -3,3 +3,8 @@ __pycache__/
 quant/data/raw/
 .env
 *.key
+quant/bot/state/
+quant/bot/logs/
+.pytest_cache/
+.coverage
+htmlcov/
