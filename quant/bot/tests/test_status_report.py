@@ -69,6 +69,12 @@ def test_status_shows_halts_flags_and_kill(tmp_path):
     assert "- kill [account]" in out and "KILL file present" in out
     assert "flag warming leader/BTCUSDT: WARMING: history gap" in out
     assert "3 bar(s) MISSING 2026-11-18T00:00:00.000Z .. 2026-11-18T02:00:00.000Z -> WARMING" in out
+    from bot import snapshot
+    assert "SNAPSHOT none in" in status.render(bot.cfg.state_dir, bot.cfg.log_dir, now_ms=bot.now, snapshot_dir=tmp_path / "ps")
+    snapshot.take(bot.cfg.state_dir, bot.cfg.log_dir, tmp_path / "ps", now_ms=bot.now - 125_000)
+    line = [x for x in status.render(bot.cfg.state_dir, bot.cfg.log_dir, now_ms=bot.now,
+                                     snapshot_dir=tmp_path / "ps").splitlines() if x.startswith("SNAPSHOT")][0]
+    assert "2m05s ago" in line and "files" in line
     lone = tmp_path / "lone"
     lone.mkdir()
     (lone / "HALT").write_text("by hand")

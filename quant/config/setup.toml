@@ -35,6 +35,8 @@ heartbeat_s = 300
 default_warmup_bars = 300            # used when a strategy module has no WARMUP_BARS attribute
 archive_refresh_min = 30             # how often to retry data.binance.vision while a history gap exists
 bar_close_grace_s = 15               # wait this long for every symbol's bar before deciding without it
+snapshot_dir = "paper_state"         # git-tracked copy of the durable state (bot/snapshot.py); "" = off
+snapshot_min = 5                     # at most every 5 minutes, plus after each bar close, trade and at stop
 
 # ---------------------------------------------------------------------------
 # Active setups.  The first one with role = "leader" is the candidate for live;

@@ -69,10 +69,12 @@ def _age(ms, now_ms) -> str:
     return "never" if not ms else f"{(now_ms - ms) / 1000:.1f}s"
 
 
-def render(state_dir: Path, log_dir: Path, show_all: bool = False, now_ms: int | None = None, n: int = 20) -> str:
+def render(state_dir: Path, log_dir: Path, show_all: bool = False, now_ms: int | None = None, n: int = 20,
+           snapshot_dir: Path | None = None) -> str:
     now_ms = int(time.time() * 1000) if now_ms is None else now_ms
     st = _load(state_dir / "status.json")
     out = []
+    snap = _load(Path(snapshot_dir) / "MANIFEST.json") if snapshot_dir else None
     if st is None:
         out.append("BOT      never started (no state/status.json)")
     else:
@@ -134,6 +136,13 @@ def render(state_dir: Path, log_dir: Path, show_all: bool = False, now_ms: int |
         out.extend(positions)
         if not st.get("filters_verified", False):
             out.append("NOTE     exchange tick/step/min-notional are unverified assumptions (bot/instruments.py)")
+    if snapshot_dir:
+        if snap and snap.get("taken_at_ms"):
+            out.append(f"SNAPSHOT {snapshot_dir} taken {snap.get('taken_at')} "
+                       f"({_dur((now_ms - snap['taken_at_ms']) / 1000)} ago, {len(snap.get('files', {}))} files); "
+                       f"commit it to survive a lost container")
+        else:
+            out.append(f"SNAPSHOT none in {snapshot_dir} yet (python3 bot/snapshot.py)")
     dec = tail_decisions(log_dir / "decisions.jsonl")
     shown = dec if show_all else [d for d in dec if d.get("kind") not in ROUTINE]
     hour_ago = iso(now_ms - 3_600_000)
@@ -157,9 +166,10 @@ def main(argv=None) -> int:
     ap.add_argument("--all", action="store_true", help="include heartbeat/bar/eval lines in the decision list")
     ap.add_argument("--state-dir", default=str(HERE / "state"))
     ap.add_argument("--log-dir", default=str(HERE / "logs"))
+    ap.add_argument("--snapshot-dir", default=str(HERE.parent / "paper_state"))
     ap.add_argument("-n", type=int, default=20)
     a = ap.parse_args(argv)
-    print(render(Path(a.state_dir), Path(a.log_dir), a.all, n=a.n))
+    print(render(Path(a.state_dir), Path(a.log_dir), a.all, n=a.n, snapshot_dir=Path(a.snapshot_dir)))
     return 0
 
 

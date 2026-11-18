@@ -1,0 +1,287 @@
+{
+ "generated_utc": "2026-11-18 16:52:34",
+ "source": "lab/results/phase2/final.json",
+ "configuration": {
+  "exchange_minimums": "ON (table from bot/instruments.py, UNVERIFIED)",
+  "risk_per_trade": 0.005,
+  "max_leverage": 3.0,
+  "start_equity": 1000.0,
+  "engine_rules": "lab/engine.py R1-R12",
+  "selection_window": [
+   "2022-11-01 00:00:00+00:00",
+   "2025-10-31 23:59:59+00:00"
+  ],
+  "holdout_window": [
+   "2025-11-01 00:00:00+00:00",
+   "2026-10-31 15:59:00+00:00"
+  ],
+  "full_window": [
+   "2022-11-01 00:00:00+00:00",
+   "2026-10-31 15:59:00+00:00"
+  ]
+ },
+ "holdout": {
+  "opened_once_utc": "2026-11-18 09:12:08",
+  "pairs_opened": 7,
+  "pairs": [
+   [
+    "oi_confirmed_breakout",
+    "BTCUSDT"
+   ],
+   [
+    "oi_confirmed_breakout",
+    "ETHUSDT"
+   ],
+   [
+    "tsmom",
+    "BTCUSDT"
+   ],
+   [
+    "tsmom",
+    "ETHUSDT"
+   ],
+   [
+    "tsmom",
+    "SOLUSDT"
+   ],
+   [
+    "week_range_breakout_volume",
+    "ETHUSDT"
+   ],
+   [
+    "week_range_breakout_volume",
+    "SOLUSDT"
+   ]
+  ]
+ },
+ "buy_and_hold_gate": {
+  "rule": "net return must beat the same symbol's 1x buy-and-hold net return over the full window on every symbol traded",
+  "any_setup_passes": false
+ },
+ "candidates_for_live": [],
+ "candidates_for_paper": [
+  "tsmom",
+  "week_range_breakout_volume"
+ ],
+ "top3": [
+  {
+   "rank": 1,
+   "module": "tsmom",
+   "status": "candidate for paper trading; unproven; not for live",
+   "candidate": true,
+   "unproven": true,
+   "symbols": [
+    "ETHUSDT",
+    "SOLUSDT"
+   ],
+   "timeframe": "4h",
+   "params": {
+    "lookback": 180,
+    "eval_hour": 20,
+    "atr_n": 14,
+    "stop_atr": 4.0
+   },
+   "params_source": "DEFAULT_PARAMS",
+   "params_note": "walk-forward's most-often-chosen grid point {\"lookback\": 120, \"stop_atr\": 3.0} was picked in 25% of fold x symbol cases, below the 50% needed to replace DEFAULT_PARAMS; the neighbourhood is also not stable on every symbol",
+   "warmup_bars": 400,
+   "required_columns": [
+    "high",
+    "low",
+    "close"
+   ],
+   "needs_open_interest": false,
+   "needs_funding_history": false,
+   "runnable_on_live_feed": true,
+   "passes_absolute_buy_and_hold_gate": false,
+   "beats_buy_and_hold_full_window_by_symbol": {
+    "ETHUSDT": true,
+    "SOLUSDT": false
+   },
+   "holdout_last_12_months_net_by_symbol": {
+    "BTCUSDT": -0.017979,
+    "ETHUSDT": 0.093905,
+    "SOLUSDT": 0.02591
+   },
+   "holdout_pass_by_symbol": {
+    "BTCUSDT": false,
+    "ETHUSDT": true,
+    "SOLUSDT": true
+   },
+   "full_window_net_by_symbol": {
+    "ETHUSDT": 0.252233,
+    "SOLUSDT": 0.283692
+   },
+   "buy_and_hold_full_window_net_by_symbol": {
+    "ETHUSDT": -0.069086,
+    "SOLUSDT": 1.355473
+   },
+   "symbols_dropped": {
+    "BTCUSDT": "did not make money in the last 12 months"
+   },
+   "score_first_36_months": 21,
+   "scores": {
+    "oos_profit": 5,
+    "max_dd": 4,
+    "trades": 5,
+    "lose_streak": 2,
+    "bear_sideways": 5
+   },
+   "scored_on_symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT"
+   ],
+   "card": "lab/results/cards/1_tsmom.md",
+   "notes": [
+    "exit and enter the opposite side at the same open on a sign flip (lab/engine.py rule R7)",
+    "expect about 11 three-losses Shield halts a year on this book"
+   ]
+  },
+  {
+   "rank": 2,
+   "module": "week_range_breakout_volume",
+   "status": "candidate for paper trading; unproven; not for live",
+   "candidate": true,
+   "unproven": true,
+   "symbols": [
+    "ETHUSDT",
+    "SOLUSDT"
+   ],
+   "timeframe": "4h",
+   "params": {
+    "range_n": 42,
+    "width_mult": 1.0,
+    "vol_fast": 6,
+    "vol_slow": 42,
+    "vol_ratio": 1.3,
+    "atr_n": 14,
+    "stop_atr": 2.0,
+    "max_hold": 42
+   },
+   "params_source": "DEFAULT_PARAMS",
+   "params_note": "walk-forward's most-often-chosen grid point {\"range_n\": 42, \"vol_ratio\": 1.15, \"width_mult\": 1.0} was picked in 12% of fold x symbol cases, below the 50% needed to replace DEFAULT_PARAMS",
+   "warmup_bars": 130,
+   "required_columns": [
+    "high",
+    "low",
+    "close",
+    "volume"
+   ],
+   "needs_open_interest": false,
+   "needs_funding_history": false,
+   "runnable_on_live_feed": true,
+   "passes_absolute_buy_and_hold_gate": false,
+   "beats_buy_and_hold_full_window_by_symbol": {
+    "ETHUSDT": true,
+    "SOLUSDT": false
+   },
+   "holdout_last_12_months_net_by_symbol": {
+    "ETHUSDT": 0.021282,
+    "SOLUSDT": 0.079092
+   },
+   "holdout_pass_by_symbol": {
+    "ETHUSDT": true,
+    "SOLUSDT": true
+   },
+   "full_window_net_by_symbol": {
+    "ETHUSDT": 0.198883,
+    "SOLUSDT": 0.196729
+   },
+   "buy_and_hold_full_window_net_by_symbol": {
+    "ETHUSDT": -0.069086,
+    "SOLUSDT": 1.355473
+   },
+   "symbols_dropped": {},
+   "score_first_36_months": 20,
+   "scores": {
+    "oos_profit": 4,
+    "max_dd": 5,
+    "trades": 3,
+    "lose_streak": 3,
+    "bear_sideways": 5
+   },
+   "scored_on_symbols": [
+    "ETHUSDT",
+    "SOLUSDT"
+   ],
+   "card": "lab/results/cards/2_week_range_breakout_volume.md",
+   "notes": [
+    "expect about 2 three-losses Shield halts a year on this book"
+   ]
+  },
+  {
+   "rank": 3,
+   "module": "oi_confirmed_breakout",
+   "status": "paper only, not a candidate for live",
+   "candidate": false,
+   "unproven": true,
+   "symbols": [
+    "BTCUSDT",
+    "ETHUSDT"
+   ],
+   "timeframe": "4h",
+   "params": {
+    "n": 30,
+    "oi_rise": 0.05,
+    "atr_n": 14,
+    "stop_atr": 2.0,
+    "max_hold": 42
+   },
+   "params_source": "DEFAULT_PARAMS",
+   "params_note": "walk-forward's most-often-chosen grid point {\"n\": 30, \"oi_rise\": 0.03, \"stop_atr\": 1.5} was picked in 25% of fold x symbol cases, below the 50% needed to replace DEFAULT_PARAMS",
+   "warmup_bars": 80,
+   "required_columns": [
+    "high",
+    "low",
+    "close",
+    "oi"
+   ],
+   "needs_open_interest": true,
+   "needs_funding_history": false,
+   "runnable_on_live_feed": false,
+   "passes_absolute_buy_and_hold_gate": false,
+   "beats_buy_and_hold_full_window_by_symbol": {
+    "BTCUSDT": false,
+    "ETHUSDT": true
+   },
+   "holdout_last_12_months_net_by_symbol": {
+    "BTCUSDT": -0.007409,
+    "ETHUSDT": -0.000118
+   },
+   "holdout_pass_by_symbol": {
+    "BTCUSDT": false,
+    "ETHUSDT": false
+   },
+   "full_window_net_by_symbol": {
+    "BTCUSDT": 0.097893,
+    "ETHUSDT": 0.235594
+   },
+   "buy_and_hold_full_window_net_by_symbol": {
+    "BTCUSDT": 1.906752,
+    "ETHUSDT": -0.069086
+   },
+   "symbols_dropped": {
+    "BTCUSDT": "did not make money in the last 12 months",
+    "ETHUSDT": "did not make money in the last 12 months"
+   },
+   "score_first_36_months": 21,
+   "scores": {
+    "oos_profit": 5,
+    "max_dd": 4,
+    "trades": 4,
+    "lose_streak": 3,
+    "bear_sideways": 5
+   },
+   "scored_on_symbols": [
+    "BTCUSDT",
+    "ETHUSDT"
+   ],
+   "card": "lab/results/cards/3_oi_confirmed_breakout.md",
+   "notes": [
+    "killed at the final gate: did not make money on either symbol in the last 12 months",
+    "reads `oi`, which the live feed does not carry: the bot will refuse to decide",
+    "expect about 4 three-losses Shield halts a year on this book"
+   ]
+  }
+ ]
+}

@@ -146,6 +146,8 @@ def primary_cfg() -> ExecConfig:
 
 def prereg() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
+    if (WORK / "stage1.pkl").exists() and (OUT / "PREREG.md").exists():
+        raise SystemExit("PREREG.md was written before stage 1 and is kept as it is; delete phase2/ to start over")
     lines = ["# Phase 2 pre-registration", "",
              f"Written {pd.Timestamp.now(tz='UTC'):%Y-%m-%d %H:%M} UTC, before stage 1 was run.", "",
              "## Kill rules (pair level, fixed in phase 1)", ""]

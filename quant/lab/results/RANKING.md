@@ -82,15 +82,29 @@ Killed by (first rule that fired):
 - 15 pairs: fewer than 30 trades in the first 36 months
 - 7 pairs: Monte Carlo chance of a loss above 20%
 - 6 pairs: walk-forward out-of-sample not profitable
-- 1 pairs: Monte Carlo 95th-percentile drawdown above 25%
-- 1 pairs: audit flag: better when executed one bar late (no future leak found)
-- 1 pairs: profit factor below 1.10
+- 1 pair: Monte Carlo 95th-percentile drawdown above 25%
+- 1 pair: audit flag: better when executed one bar late (no future leak found)
+- 1 pair: profit factor below 1.10
 
 A pair usually fails several rules at once. Pairs failing each rule: DELAY 1, N<30 15, NET 52, PF 54, STRESS 53, WF 52, GRID 52, MC-LOSS 68, MC-DD 20.
 
-No pair has a look-ahead leak: the prefix check was clean on all 87 (20 cut points each). The one DELAY flag (`btc_shock_alt_lag` on ETH) is a pair that lost 2.6% on time and made 2.7% one bar late; it fails six other rules.
+No pair has a look-ahead leak: the prefix check was clean on all 87 pairs (20 cut points each).
+The one DELAY flag is `btc_shock_alt_lag` on ETHUSDT: it returned -2.6% on time and +2.7% when executed one bar late. That is not a leak, and the pair fails 6 other rules anyway.
 
-What died as a family: every session-open setup, every BTC-lead/alt-lag setup, every liquidation-flush setup, both mean-reversion setups and all three funding setups (the funding ones mostly for lack of trades). What is left is almost entirely slow trend or breakout following on 4h bars.
+By family:
+
+| Family | Setups | Pairs alive / tested | Alive |
+|---|---|---|---|
+| btc_lead_lag | 3 | 0 / 9 | none |
+| session_open | 4 | 1 / 12 | `ny_open_drive` ETH |
+| baseline | 5 | 7 / 15 | `donchian_trend` ETH, `donchian_trend` SOL, `ma_trend_atr_stop` BTC, `tsmom` BTC, `tsmom` ETH, `tsmom` SOL, `vol_squeeze_breakout` SOL |
+| range_breakout_volume | 3 | 3 / 9 | `range_breakout_volume` SOL, `week_range_breakout_volume` ETH, `week_range_breakout_volume` SOL |
+| funding_extremes | 3 | 0 / 9 | none |
+| liquidation_flush_reversal | 4 | 0 / 12 | none |
+| oi_divergence | 4 | 4 / 12 | `oi_confirmed_breakout` BTC, `oi_confirmed_breakout` ETH, `oi_divergence_fade` ETH, `oi_reset_trend` SOL |
+| trend_pullback | 3 | 1 / 9 | `trend_pullback_ma` BTC |
+
+Lead-lag, liquidation-flush and funding setups have no surviving pair (the funding ones mostly for lack of trades), and session setups have one of twelve. 15 of the 16 surviving pairs follow a move (trend, breakout or opening drive); 14 of the 16 are on 4h bars. The only fade left is `oi_divergence_fade` on ETH, with 31 trades.
 
 ### Where the exchange minimums change the picture (no-filter numbers, labelled)
 
@@ -211,6 +225,30 @@ Go with a new 30-bar extreme only when open interest has risen 5%+ over the same
 | Worst month | -2.3% (2023-05) | -1.2% (2025-11) | -2.3% (2023-05) |
 | Equal-weight buy-and-hold of the same symbols | +229.7% | -37.6% | +91.9% |
 
+### Rank 1 against rank 2
+
+The order follows the pre-registered score. The two are close, and they differ in character, so the owner should see both sides:
+
+| ETH + SOL book, full window unless stated | `tsmom` | `week_range_breakout_volume` |
+|---|---|---|
+| Pre-registered score (first 36 months, symbols alive then) | 21 | 20 |
+| Same score recomputed on ETH + SOL only | 20 (5, 3, 4, 3, 5) | 20 (4, 5, 3, 3, 5) |
+| Net return | +53.6% | +39.6% |
+| Last 12 months (unseen) | +12.0% | +10.0% |
+| Max drawdown | 10.3% | 4.3% |
+| Trades per year | 64 | 35 |
+| Calendar years in profit (of 5, two of them partial) | 3 | 5 |
+| Losing quarters (of 17) | 9 | 3 |
+| Share of 12-month windows that lost money | 4.5% | 0.0% |
+| Longest stretch without a new equity high | 501 days | 237 days |
+| Best single trade as a share of a symbol's profit | 33% and 77% | 19% and 25% |
+| Three-losses Shield halts per year on its own book | 11 | 2 |
+
+- Recomputing the score on the two symbols each setup keeps gives the same total. The pre-registered tie-break (boring baseline family first) still puts `tsmom` first. I have not re-ordered them after the fact.
+- `tsmom` has more trades and more return, and it is the textbook baseline. Its profit is lumpy: it lost money in two of the five calendar years and in half the quarters.
+- `week_range_breakout_volume` is the steadier of the two: lower drawdown, no losing year, fewer losing quarters and less dependence on single trades. It has about half as many trades and less return.
+- If only one is paper-traded, the score says `tsmom`; anyone who weighs steadiness above the score would pick rank 2. Both are unproven and they are related bets, so running both on paper costs nothing and adds evidence.
+
 ### Final check (per symbol; yes/no with the number)
 
 | Question | `tsmom` BTC | `tsmom` ETH | `tsmom` SOL | `week_range_breakout_volume` ETH | `week_range_breakout_volume` SOL | `oi_confirmed_breakout` BTC | `oi_confirmed_breakout` ETH |
@@ -228,7 +266,7 @@ Go with a new 30-bar extreme only when open interest has risen 5%+ over the same
 - 'Nearby settings' counts YES at 80% of the grid or more. `tsmom` on ETH loses with the 20-day lookback at every stop width and wins with 30 and 60 days.
 - 'Over 50+ trades' is per symbol here; pooled over the symbols each setup keeps, `tsmom` has 185 and `week_range_breakout_volume` 99 in the first 36 months, which is what the owner's 50-trade rule asks for.
 - The random-entry line moves every real trade to a random day (same hour, same side, same stop distance in ATR, same holding time) 300 times. It is not corrected for the 87 tests and is not a kill rule.
-- Executing the same 4h signals on 1h bars instead of 4h bars changes no full-window result by more than 0.02 points.
+- Executing the same 4h signals on 1h bars instead of 4h bars changes no result (first 36 months, last 12 months or full window) by more than 0.02 points.
 
 ## 5. Buy-and-hold gate
 
@@ -236,19 +274,19 @@ Gate (owner): the setup's net return must beat the same symbol's 1x buy-and-hold
 
 | Pair | Setup, full window | Buy-and-hold, full window | Beats it? | In bear bars: setup / B&H | In sideways bars: setup / B&H | Last 12 months: setup / B&H |
 |---|---|---|---|---|---|---|
-| `tsmom` BTCUSDT | +17.0% | +190.7% | **NO** | -2.5% / +42.0% | +10.1% / -20.0% | -1.8% / -31.8% |
-| `tsmom` ETHUSDT | +25.2% | -6.9% | **YES** | +0.1% / -23.8% | +17.5% / -18.1% | +9.4% / -43.3% |
-| `tsmom` SOLUSDT | +28.4% | +135.5% | **NO** | -0.3% / -36.1% | +6.3% / +67.9% | +2.6% / -48.9% |
-| `week_range_breakout_volume` ETHUSDT | +19.9% | -6.9% | **YES** | +4.0% / -23.8% | +15.7% / -18.1% | +2.1% / -43.3% |
-| `week_range_breakout_volume` SOLUSDT | +19.7% | +135.5% | **NO** | +4.3% / -36.1% | +10.4% / +67.9% | +7.9% / -48.9% |
-| `oi_confirmed_breakout` BTCUSDT | +9.8% | +190.7% | **NO** | -2.0% / +42.0% | +9.7% / -20.0% | -0.7% / -31.8% |
-| `oi_confirmed_breakout` ETHUSDT | +23.6% | -6.9% | **YES** | +0.7% / -23.8% | +18.0% / -18.1% | -0.0% / -43.3% |
+| `tsmom` BTCUSDT | +17.0% | +190.7% | **NO** | -2.5% / +42.0% | +10.1% / -20.0% | -1.80% / -31.8% |
+| `tsmom` ETHUSDT | +25.2% | -6.9% | **YES** | +0.1% / -23.8% | +17.5% / -18.1% | +9.39% / -43.3% |
+| `tsmom` SOLUSDT | +28.4% | +135.5% | **NO** | -0.3% / -36.1% | +6.3% / +67.9% | +2.59% / -48.9% |
+| `week_range_breakout_volume` ETHUSDT | +19.9% | -6.9% | **YES** | +4.0% / -23.8% | +15.7% / -18.1% | +2.13% / -43.3% |
+| `week_range_breakout_volume` SOLUSDT | +19.7% | +135.5% | **NO** | +4.3% / -36.1% | +10.4% / +67.9% | +7.91% / -48.9% |
+| `oi_confirmed_breakout` BTCUSDT | +9.8% | +190.7% | **NO** | -2.0% / +42.0% | +9.7% / -20.0% | -0.74% / -31.8% |
+| `oi_confirmed_breakout` ETHUSDT | +23.6% | -6.9% | **YES** | +0.7% / -23.8% | +18.0% / -18.1% | -0.01% / -43.3% |
 
 **Result: no setup passes the gate.** `tsmom` and `week_range_breakout_volume` pass on ETH and fail on SOL; `oi_confirmed_breakout` passes on ETH and fails on BTC.
 
 - The ETH passes say more about ETH than about the setups: 1x ETH buy-and-hold returned -6.9% because funding ate the price gain.
 - Regime labels are trailing (90-day return and 200-day mean, known at each bar's open), so 'bear bars' include the rebounds that follow a fall. That is why BTC buy-and-hold shows a gain inside bear-labelled bars.
-- In the unseen year every pair lost less than buy-and-hold, which fell 32% to 49%.
+- In the unseen year every pair did better than buy-and-hold, which fell 32% to 49%. Three of the seven still lost money or stood still.
 
 ### Risk-adjusted comparison (reported separately; it does not replace the gate)
 
@@ -334,15 +372,16 @@ What the portfolio pass shows:
 | `oi_confirmed_breakout` BTC+ETH | Last 12 months | -0.6% | +0.2% | 3.9% | 3 (3 streak) |
 | `oi_confirmed_breakout` BTC+ETH | Full window | +38.9% | +40.3% | 7.0% | 17 (17 streak) |
 
-`tsmom` alone would trip the three-losses halt 43 times in four years (about 11 a year). In the real bot each one stops that book until a person clears it.
+- These books trade both symbols from one $1,000, so they compound a little faster than the sum of the per-symbol runs quoted in the outcome table.
+- `tsmom` alone would trip the three-losses halt 43 times in four years (about 11 a year). In the real bot each one stops that book until a person clears it.
 
 ## 7. What the evidence does and does not support
 
-**It supports this much.** Under realistic costs, 71 of 87 setup-symbol pairs fail outright, and whole families (session, lead-lag, liquidation flush, mean reversion) have nothing in them at these timeframes and fees. Slow trend and breakout following on 4h bars made modest money in the first 36 months on ETH and SOL (roughly 4% to 8% a year per symbol at 0.5% risk, drawdowns of 4% to 10%). Two such setups also made money in a year they had never seen, a bear market, while buy-and-hold lost 43% to 49%. There is no look-ahead leak in any of them, they survive doubled fees and slippage, and they do better than same-side random entries.
+**It supports this much.** Under realistic costs, 71 of 87 setup-symbol pairs fail outright. The lead-lag, liquidation-flush and funding families have no surviving pair, and the session family has one. Slow trend and breakout following on 4h bars made modest money in the first 36 months: for the four pairs that survive, 3.0% to 7.3% a year per symbol at 0.5% risk, with drawdowns of 3.8% to 9.0%. Those four also made money in a year they had never seen, a bear market in which ETH and SOL buy-and-hold lost 43% and 49%. None has a look-ahead leak, all survive doubled fees and slippage, and each beat same-side random entries in the first 36 months (p from 0.02 to 0.05 per pair, not corrected for the number of tests).
 
 **It does not support this.**
 
-- **That the edge is real.** No pair and no setup is statistically significant once 87 (or 29) tests are accounted for. The unseen year is one more data point, about 20 to 37 trades per pair.
+- **That the edge is real.** No pair and no setup is statistically significant once 87 (or 29) tests are accounted for. The unseen year is one more data point: 19 to 37 trades per surviving pair.
 - **That the survivors are different bets.** They are close cousins: trend or breakout following on the same three correlated coins. If crypto stops trending they fail together.
 - **That the profit is spread out.** One long trade (2023-10-01 to 2024-01-21, +43R) is 77% of `tsmom`'s four-year profit on SOL; without its three best trades that leg loses money. On ETH the best trade is 33%. `week_range_breakout_volume` is steadier (best trade 19% to 25%) but has only 64 to 76 trades per symbol in four years.
 - **That anything beats buy-and-hold.** The gate fails. The ETH passes come from ETH buy-and-hold losing money.
@@ -356,10 +395,10 @@ What the portfolio pass shows:
 - **Open interest is not on the live feed.** `oi_confirmed_breakout` reads `oi`; the bot marks live OI as unknown and refuses to trade a setup whose required column is unknown. It cannot run until OI is fed live. The two candidates need only price and volume (`high`, `low`, `close`; plus `volume` for the breakout).
 - **Funding history stops at 2026-10-31.** Neither candidate reads funding for its signals; it only affects P&L accounting, which the bot takes from the live funding stream.
 - **Warm-up:** `tsmom` 400 four-hour bars (67 days), `week_range_breakout_volume` 130 (22 days).
-- **Exchange minimums are unverified.** With the assumed table, `tsmom` on ETH had 3 orders refused in four years and its smallest notional was about $23 against an assumed $20 minimum. If the real ETH minimum is higher, a noticeable share of `tsmom` ETH orders will be refused. SOL is unaffected.
-- **BTC is not traded** by either candidate: `tsmom` BTC failed the unseen year, and on $1,000 most BTC orders are below the minimum anyway.
-- **Shield versus trend following:** expect a three-losses halt on `tsmom`'s book about once a month. Decide who clears it and how fast, or the paper results will mostly measure halts.
-- **Same-open reversal (engine R7):** `tsmom` exits and enters the opposite side at the same open when the 30-day sign flips. The bot must do the same or it will lag the backtest by a day on every flip.
+- **Exchange minimums are unverified.** With the assumed table, `tsmom` on ETH had 3 orders refused in four years and its smallest order was about $23 against an assumed $20 minimum (median $84). If the real ETH minimum is higher, a noticeable share of `tsmom` ETH orders will be refused. On SOL the smallest order was $18 against an assumed $5.
+- **BTC is not traded** by either candidate: `tsmom` BTC failed the unseen year, and on $1,000 most of its BTC orders were below the minimum anyway (430 refused in four years).
+- **Shield versus trend following:** expect a three-losses halt on `tsmom`'s book about 11 times a year and on `week_range_breakout_volume`'s about 2 times. Decide who clears them and how fast, or the paper results will mostly measure halts.
+- **Same-open reversal (`lab/engine.py` rule R7; point 9 of the phase-1 report):** `tsmom` exits and enters the opposite side at the same open when the 30-day sign flips. The bot must do the same or it will lag the backtest by a day on every flip.
 - **Parameters:** DEFAULT_PARAMS for all three (`lab/results/top3.json`).
 
 ## Files

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Supervisor for the paper bot.
 #   bot/run.sh start      start the supervisor in the background (it starts and restarts the bot)
+#                         after a lost bot/state:  start --restore  (from paper_state/)  or  start --fresh
 #   bot/run.sh stop       stop bot and supervisor cleanly (open paper positions stay in state/)
 #   bot/run.sh restart    stop, then start (use after editing config/setup.toml)
 #   bot/run.sh status     compact status (bot/status.py)
@@ -19,6 +20,7 @@ BOT_CMD="${BOT_CMD:-$PY -m bot.main}"
 BACKOFF_START="${BOT_BACKOFF_START:-2}"
 BACKOFF_MAX="${BOT_BACKOFF_MAX:-300}"
 HALT_POLL="${BOT_HALT_POLL:-10}"
+SNAP="${BOT_SNAPSHOT_DIR:-$ROOT/paper_state}"
 SUP_PID="$STATE/supervisor.pid"
 SUP_LOG="$LOGS/supervisor.log"
 mkdir -p "$STATE" "$LOGS"
@@ -87,6 +89,18 @@ case "${1:-}" in
   supervise) supervise ;;
   start)
     if alive "$(cat "$SUP_PID" 2>/dev/null)"; then echo "supervisor already running (pid $(cat "$SUP_PID"))"; exit 0; fi
+    if [ ! -f "$STATE/books.json" ] && [ -f "$SNAP/MANIFEST.json" ]; then
+      # bot/state was lost (container reclaimed?) but a snapshot exists: make the human choose
+      case "${2:-}" in
+        --restore) "$PY" "$ROOT/bot/snapshot.py" --restore --state-dir "$STATE" --log-dir "$LOGS" --dir "$SNAP" || exit 1 ;;
+        --fresh)   echo "starting with new books; the snapshot in $SNAP will be replaced by the new run" ;;
+        *) echo "bot/state has no books, but a snapshot exists:"
+           "$PY" "$ROOT/bot/snapshot.py" --show --dir "$SNAP"
+           echo "choose:  $0 start --restore   (resume from the snapshot)"
+           echo "         $0 start --fresh     (ignore it, start new books)"
+           exit 3 ;;
+      esac
+    fi
     nohup setsid "$0" supervise > /dev/null 2>&1 &
     sleep 1
     echo "supervisor started (pid $(cat "$SUP_PID" 2>/dev/null)); logs: $SUP_LOG, $LOGS/bot.log"
@@ -105,5 +119,5 @@ case "${1:-}" in
     ;;
   restart) "$0" stop; "$0" start ;;
   status) exec "$PY" "$ROOT/bot/status.py" "${@:2}" ;;
-  *) echo "usage: $0 start|stop|restart|status|supervise"; exit 64 ;;
+  *) echo "usage: $0 start [--restore|--fresh] | stop | restart | status | supervise"; exit 64 ;;
 esac

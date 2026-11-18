@@ -50,6 +50,8 @@ class EngineCfg:
     default_warmup_bars: int = 300
     archive_refresh_min: float = 30.0
     bar_close_grace_s: float = 15.0
+    snapshot_dir: str = ""           # "" = the bot takes no snapshots itself; relative paths are under quant/
+    snapshot_min: float = 5.0        # at most one snapshot per this many minutes (plus bar closes and shutdown)
 
 
 @dataclass(frozen=True)

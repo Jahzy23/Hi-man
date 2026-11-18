@@ -129,6 +129,43 @@ def test_start_stop_status_commands(tmp_path):
             pass
 
 
+def test_start_next_to_an_unrestored_snapshot_makes_the_human_choose(tmp_path):
+    """bot/state is gone (container reclaimed) but paper_state/ has a snapshot: no silent fresh start."""
+    import json
+    e = env_for(tmp_path, "serve")
+    snap = tmp_path / "paper_state"
+    src_state, src_logs = tmp_path / "old_state", tmp_path / "old_logs"
+    src_state.mkdir()
+    src_logs.mkdir()
+    (src_state / "books.json").write_text(json.dumps({"version": 1, "books": {}}))
+    from bot import snapshot
+    snapshot.take(src_state, src_logs, snap)
+    e["BOT_SNAPSHOT_DIR"] = str(snap)
+    try:
+        r = subprocess.run([RUN, "start"], env=e, capture_output=True, text=True, timeout=30)
+        assert r.returncode == 3 and "start --restore" in r.stdout and "start --fresh" in r.stdout
+        assert "snapshot at" in r.stdout and not (tmp_path / "state" / "runs").exists()      # nothing was started
+        r = subprocess.run([RUN, "start", "--restore"], env=e, capture_output=True, text=True, timeout=30)
+        assert r.returncode == 0 and "restored 1 file(s)" in r.stdout and "supervisor started" in r.stdout
+        assert (tmp_path / "state" / "books.json").exists()
+        assert wait_for(lambda: (tmp_path / "state" / "runs").exists())
+        subprocess.run([RUN, "stop"], env=e, capture_output=True, text=True, timeout=40)
+        # with books in place the snapshot is no longer a question
+        d2 = tmp_path / "second"
+        d2.mkdir()
+        e2 = env_for(d2, "serve")
+        e2["BOT_SNAPSHOT_DIR"] = str(snap)
+        r = subprocess.run([RUN, "start", "--fresh"], env=e2, capture_output=True, text=True, timeout=30)
+        assert r.returncode == 0 and "new books" in r.stdout and "supervisor started" in r.stdout
+        subprocess.run([RUN, "stop"], env=e2, capture_output=True, text=True, timeout=40)
+    finally:
+        for d in (tmp_path, tmp_path / "second"):
+            try:
+                os.kill(int((d / "state" / "supervisor.pid").read_text()), signal.SIGKILL)
+            except Exception:
+                pass
+
+
 def _alive(pid):
     try:
         os.kill(pid, 0)

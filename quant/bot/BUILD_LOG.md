@@ -105,6 +105,7 @@ Decisions taken where the brief or SPEC left room, with the alternative that was
 | `journal.py` | `logs/decisions.jsonl`, `logs/trades.csv` (append-only, fsync per line, strict JSON). |
 | `main.py`, `run.sh` | Entry point with exit codes; supervisor loop. |
 | `status.py`, `report.py` | Read-only views over the files above. |
+| `snapshot.py` | Durable copy of the state to `paper_state/` and `--restore`. |
 | `replay.py` | Test tool: replays archived bars through the live path. |
 
 **State on disk** (everything needed to resume; all JSON written by write-then-rename):
@@ -118,6 +119,22 @@ Decisions taken where the brief or SPEC left room, with the alternative that was
 | `state/market.json`, `state/status.json` | Funding observation state; snapshot for `status.py` (also the "last alive" time). |
 | `state/bot.lock`, `state/bot.pid`, `state/supervisor.pid` | Single-instance lock and pids. |
 | `logs/decisions.jsonl`, `logs/trades.csv`, `logs/bot.log`, `logs/bot.out`, `logs/supervisor.log` | Logs. |
+
+**Surviving a lost container.** `bot/state` and `bot/logs` are git-ignored, so they vanish with the
+container. `bot/snapshot.py` copies the minimal durable state into `paper_state/` (meant to be
+committed): `books.json`, `shield.json`, `HALT`/`KILL` if present, `market.json`, `status.json`, the
+own-bar CSVs, `trades.csv` and the last 2,000 decision lines - an allowlist, with a SHA-256 per file
+in `MANIFEST.json`. No secret is ever on disk; as a second lock the snapshot is refused if a value of
+`BINANCE_API_KEY`/`BINANCE_API_SECRET` appears in any copied file, and `GO_LIVE_CONFIRMED` is never
+copied. `--restore` writes the files back only when `bot/state` and `bot/logs` hold no file at all
+and every checksum matches; otherwise it writes nothing. With `snapshot_dir` set in the config (it
+is, in the shipped file) the engine refreshes the snapshot itself: shortly after start, within
+seconds of a bar close or any order/fill/exit, at most every 5 minutes otherwise, and at shutdown; a
+failing snapshot raises a flag and never stops trading. `run.sh start` refuses to start silently
+when `bot/state` has no books but a snapshot exists: the human picks `start --restore` or
+`start --fresh`. After a restore the time since the snapshot counts as an outage (decision 4 above).
+**The bot does not commit or push `paper_state/`** (no git commands were run in this build): whoever
+operates it has to, or the snapshot dies with the container too.
 
 **No double entry, no lost stop.** A decision for bar t is made at most once: the book stores the last
 signal bar it processed in the same atomic write as the order. Order ids are deterministic
@@ -199,7 +216,7 @@ deletes the file. Halts that leave the process alive (loss streak, clock, KILL) 
 
 ## 4. Build (test-first)
 
-Order of work, honestly: the paper broker and Shield tests were written before their modules
+Order of work, as it happened: the paper broker and Shield tests were written before their modules
 (`test_paper_broker.py`, `test_shield.py`) and the modules were written to make them pass. For the
 other modules the tests were written directly after the code, in the same sitting. The tests found
 real defects before anything ran live, among them: a wrong unit conversion in the funding-archive
@@ -216,6 +233,7 @@ Test suites (`python3 -m pytest bot/tests`):
 | `test_history.py` | Frame equality with `load()` on the real archive (1h and 4h), gaps, unknown cells, 4h alignment, torn CSV line, archive checksum handling. |
 | `test_parity.py` | Replays the last ten days of archived 1h ETHUSDT bars through the bar-close path; every decision equals the row `signals()` gives on the full frame, for 1h and for 4h bars. |
 | `test_parity_lab.py` | Replays archived bars through Engine -> Shield -> PaperBroker and compares the trade list with `lab.engine` for three of Radar's strategies (below). |
+| `test_snapshot.py` | Snapshot and restore in both directions: exact file set, resume of positions/stops/halts/bars/ledger, long-outage flatten after restore, refusal on non-empty directories, checksum and manifest tampering, no secrets, engine-driven snapshots. |
 | `test_strategy_loader.py`, `test_config.py`, `test_feed.py`, `test_binance_live.py`, `test_main.py`, `test_run_sh.py`, `test_status_report.py`, `test_misc.py` | Loader contract and probe, config validation, feed plumbing with fake sockets, live-adapter gates/requests/signing, exit codes, supervisor loop with a fake bot, status/report output, sizing and rounding. |
 
 Trade-list parity with the backtester (exchange filters on in both, Shield's loss-streak halt off
@@ -224,14 +242,38 @@ because the backtester has none):
 | Strategy | Symbol, TF | Window | Trades | Result |
 |---|---|---|---|---|
 | donchian_trend | ETHUSDT 4h | 2026-05-01 .. 10-31 | 15 | identical list (signal bar, entry bar, exit bar, side, entry type, exit reason, quantity), including a stop-and-reverse; exit prices within 2e-6 (tick rounding); realised equity 1014.5761 vs 1014.5769 |
-| pullback_limit_sma | BTCUSDT 4h | 2026-08-01 .. 10-31 | PARITY_PULLBACK |
+| pullback_limit_sma | BTCUSDT 4h | 2026-08-01 .. 10-31 | 16 | identical list (limit entries, targets, max_hold). 28 further signals were below the exchange minimum size: Shield blocked 28, the backtester rejected the same 28. Realised equity 978.1424 vs 978.1390 |
 | breakout_retest | SOLUSDT 1h | 2026-10-01 .. 10-31 | 12 | identical list; quantity differs by up to 2 lot steps where tick rounding changes the stop distance; realised equity 1010.2210 vs 1010.2658 |
 
-Result of the full run: **TESTS_TOTAL**. Statement coverage of `bot/` (tests excluded): **COVERAGE_TOTAL**.
+Result of the full run: **269 passed, 0 failed** (about 4 minutes; 3 of them are the backtester replays). Statement coverage of `bot/` (tests excluded): **96%** (3,124 statements, 117 not executed).
 Per module:
 
 ```
-COVERAGE_TABLE
+Name                     Stmts   Miss  Cover
+------------------------------------------------------
+bot/__init__.py              0      0   100%
+bot/archive.py             134      2    99%
+bot/binance_live.py        123      3    98%
+bot/config.py              142      0   100%
+bot/engine.py              532     13    98%
+bot/exchange.py             23      0   100%
+bot/feed.py                149      6    96%
+bot/history.py             319      7    98%
+bot/instruments.py          40      0   100%
+bot/journal.py              80      0   100%
+bot/main.py                129     11    91%
+bot/models.py               86      0   100%
+bot/paper.py               368     21    94%
+bot/replay.py               80      1    99%
+bot/report.py              103     12    88%
+bot/shield.py              283      9    97%
+bot/sizing.py               11      0   100%
+bot/snapshot.py            171     11    94%
+bot/status.py              133     17    87%
+bot/strategy_loader.py     155      4    97%
+bot/util.py                 63      0   100%
+------------------------------------------------------
+TOTAL                     3124    117    96%
 ```
 
 Not covered by any test: the real network paths (`websocket.create_connection`, `requests` to the
@@ -259,6 +301,10 @@ Every file was re-read as a hostile reviewer. Findings, all fixed unless marked 
 | 13 | A hand-written HALT file blocked nothing if `shield.json` had no halt. | Adopted as a `manual` halt at start and while running. |
 | 14 | History assembly rebuilt every live row on each bar (cost grew with uptime; a 6-month replay took minutes). | Incremental. |
 | 15 | Feed: one odd message would drop the connection; the first reconnect waited 1 s. | Bad payloads are counted and skipped; first retry is immediate; silent sockets are cut after 5 s. |
+
+| 16 | Restoring a snapshot without the HALT file would have made Shield read its absence as "a human cleared the halt" and resume a book halted for a loss streak. | HALT and KILL are part of the snapshot. Test: a restored loss-streak halt is still in force. |
+| 17 | Snapshot files copied in the wrong order could show a trade as closed in the ledger but still open in the books (it would be closed twice). | Ledger first, books last; the start-up reconciliation covers the other direction. An interrupted restore leaves no `books.json`, so nothing starts on half a state. |
+| 18 | A restored manifest could name any path. | Allowlist on restore; a manifest entry outside it (or with `..`) is refused before anything is written. |
 
 Assumptions flagged for verification before go-live (they are hard-coded; `exchangeInfo` is unreachable):
 
@@ -295,6 +341,8 @@ python3 bot/report.py --hours 24
 bot/run.sh stop         # clean stop; paper positions stay in state/
 bot/run.sh restart      # after editing config/setup.toml
 touch bot/state/KILL    # flatten and halt now; remove KILL and HALT to resume
+python3 bot/snapshot.py [--show | --restore]    # durable copy in paper_state/ (the bot refreshes it itself)
+bot/run.sh start --restore                      # after a lost container: restore, then start
 rm bot/state/HALT       # clear a halt that needs a human
 ```
 

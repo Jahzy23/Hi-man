@@ -30,7 +30,7 @@ from .paper import PaperBroker
 from .shield import ACCOUNT, Shield
 from .sizing import position_size
 from .strategy_loader import LoadedStrategy, evaluate, load_strategy, probe
-from .util import TF_MS, atomic_write_json, iso, now_ms, read_json
+from .util import ROOT, TF_MS, atomic_write_json, iso, now_ms, read_json
 
 FUNDING_FRESH_MS = 10_000      # the last pre-settlement rate must be this recent to count as observed
 STATUS_EVERY_MS = 5_000
@@ -90,6 +90,12 @@ class Engine:
         self._started = False
         self.counters = {"ticks": 0, "klines": 0, "marks": 0, "bars": 0, "decisions": 0}
         self.on_decision = None            # optional observer(setup_id, symbol, Decision), used by the parity test
+        snap = cfg.engine.snapshot_dir
+        self.snapshot_dir = None if not snap else (Path(snap) if Path(snap).is_absolute() else ROOT / snap)
+        self._snap_lines = 0
+        self._last_snap = 0
+        self._snap_now = False
+        self._snap_failed = False
 
     # ================================================================== lifecycle
     def startup(self, now: int) -> None:
@@ -145,6 +151,7 @@ class Engine:
             f"{self.cfg.shield.stale_feed_s:.0f} s they are flattened at the first tick" if n_pos or n_ord else ""),
                               ts=now)
         self.shield.save()
+        self._maybe_snapshot(now, force=True)
         self.journal.close()
 
     def fatal(self, exc: BaseException, now: int, where: str = "") -> None:
@@ -350,6 +357,7 @@ class Engine:
             self.pending.pop(old, None)
         self._decided.add(bar_ms)
         self._decided = {b for b in self._decided if b > bar_ms - 48 * HOUR_MS}
+        self._snap_now = True            # a new bar is on disk: refresh the durable snapshot
         close_ms = bar_ms + HOUR_MS
         self._handle_events(self.broker.expire_orders(close_ms), now)
         for setup in self.cfg.setups:
@@ -499,6 +507,7 @@ class Engine:
             ev_ts = e.pop("ts", None)
             self.journal.decision(kind, reason, setup=e.pop("setup", None), symbol=e.pop("symbol", None), ts=now,
                                   event_time=iso(ev_ts), **e)
+            self._snap_now = True        # orders, fills, exits: the snapshot follows within seconds
             if trade is not None:
                 self.journal.trade(trade)
                 self.shield.on_trade_closed(trade, now)
@@ -540,6 +549,31 @@ class Engine:
         news = self.journal.lines != self._status_lines and now - self._last_status >= 1000
         if news or now - self._last_status >= STATUS_EVERY_MS:
             self._write_status(now)
+        self._maybe_snapshot(now)
+
+    def _maybe_snapshot(self, now: int, force: bool = False) -> None:
+        """Copy the durable state to the git-tracked snapshot directory (bot/snapshot.py). Runs after
+        the status file is fresh; a failure is reported and never stops trading."""
+        if self.snapshot_dir is None:
+            return
+        due = self.journal.lines != self._snap_lines and now - self._last_snap >= self.cfg.engine.snapshot_min * 60_000
+        if not (force or due or (self._snap_now and now - self._last_snap >= 5_000)):
+            return
+        self._last_snap, self._snap_now = now, False
+        try:
+            from .snapshot import take
+            take(self.state_dir, self.cfg.log_dir, self.snapshot_dir, now_ms=now)
+            self._snap_lines = self.journal.lines
+            self.shield.clear_flag("snapshot_error")
+        except Exception as e:           # disk, permissions, a credential found in a file: report, keep trading
+            why = f"snapshot to {self.snapshot_dir} failed: {type(e).__name__}: {e}"
+            self.shield.flag("snapshot_error", why, now_ms=now)
+            if not self._snap_failed:
+                self.journal.decision("flag", why, ts=now)
+            self._snap_failed = True
+            self._snap_lines = self.journal.lines
+        else:
+            self._snap_failed = False
 
     def _heartbeat(self, now: int, ages: dict) -> None:
         hb_ms = self.cfg.engine.heartbeat_s * 1000
