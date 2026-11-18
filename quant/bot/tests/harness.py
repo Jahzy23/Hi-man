@@ -39,6 +39,27 @@ def signals(df, p, ctx=None):
     out["exit"] = df.index.hour == p["exit_hour"]
     return out
 ''',
+    # signals by hour of day: lets a test put an exit flag and a new signal on chosen rows
+    "script": '''
+import numpy as np, pandas as pd
+NAME = "script"; TIMEFRAME = "1h"; REGIME = "trending"; ONE_LINER = "test fixture"
+DEFAULT_PARAMS = {"long_hours": [], "short_hours": [], "exit_hours": [], "max_hold": 0, "stop_pct": 0.01,
+                  "limit_pct": 0.0, "entry_valid": 1, "target_pct": 0.0}
+WARMUP_BARS = 50
+def signals(df, p, ctx=None):
+    h = df.index.hour; c = df["close"]
+    s = np.where(np.isin(h, p["long_hours"]), 1, np.where(np.isin(h, p["short_hours"]), -1, 0))
+    out = pd.DataFrame(index=df.index)
+    out["side"] = s
+    ref = c * (1 - s * p["limit_pct"])
+    out["entry"] = np.where(s != 0, ref, np.nan) if p["limit_pct"] else np.nan
+    out["entry_valid"] = int(p["entry_valid"])
+    out["stop"] = np.where(s != 0, ref * (1 - s * p["stop_pct"]), np.nan)
+    out["target"] = np.where(s != 0, ref * (1 + s * p["target_pct"]), np.nan) if p["target_pct"] else np.nan
+    out["max_hold"] = float(p["max_hold"]) if p["max_hold"] else np.nan
+    out["exit"] = np.isin(h, p["exit_hours"])
+    return out
+''',
     "always4h": '''
 import numpy as np, pandas as pd
 NAME = "always4h"; TIMEFRAME = "4h"; REGIME = "trending"; ONE_LINER = "test fixture"
@@ -156,11 +177,22 @@ class Bot:
         self.engine.on_book(sym, float(bid), float(ask if ask is not None else round(bid + tick, 2)), self.now - 80, self.now)
 
     def ticks(self, at=None, **prices):
-        """Fresh quotes for every symbol (default 60000 / 1800 / 75)."""
+        """Fresh quotes for every symbol (default 60000 / 1800 / 75), plus the once-a-second markPrice
+        message of the kline connection, repeating whatever funding rate / time the engine last saw."""
         if at is not None:
             self.now = at
         for sym, px in {"BTCUSDT": 60000.0, "ETHUSDT": 1800.0, "SOLUSDT": 75.0, **prices}.items():
             self.tick(sym, px)
+        for sym in self.cfg.symbols:
+            self.keepalive_mark(sym)
+
+    def keepalive_mark(self, sym):
+        f = self.engine.funding[sym]
+        e_ms = self.now - 100
+        if f.last_r_e_ms is not None and f.last_r_e_ms >= e_ms:
+            return
+        nxt = f.next_ms if f.next_ms is not None and f.next_ms > e_ms else e_ms - e_ms % (8 * HOUR_MS) + 8 * HOUR_MS
+        self.engine.on_mark(sym, f.last_mark or 1.0, f.last_r if f.last_r is not None else 0.0001, nxt, e_ms, self.now)
 
     def close_bar(self, bar_ms, syms=None, at=None, lag=300, **closes):
         """Closed 1h klines for `syms`. Bar closes at bar_ms + 1h; the events arrive `lag` ms later."""

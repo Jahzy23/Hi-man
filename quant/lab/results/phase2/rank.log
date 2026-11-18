@@ -1,0 +1,138 @@
+== kill table: rule that killed each pair (first in the pre-registered order) ==
+killed_by
+loses money after costs                                                 40
+                                                                        16
+fewer than 30 trades in the first 36 months                             15
+Monte Carlo chance of a loss above 20%                                   7
+walk-forward out-of-sample not profitable                                6
+Monte Carlo 95th-percentile drawdown above 25%                           1
+audit flag: better when executed one bar late (no future leak found)     1
+profit factor below 1.10                                                 1
+
+== how many pairs each rule fails (a pair can fail several) ==
+mc_loss    68
+pf         54
+stress     53
+net        52
+wf         52
+grid       52
+mc_dd      20
+trades     15
+audit       1
+
+== pairs with no rule fired ==
+                        module   symbol  tf  trades    net     pf  max_dd  sharpe  stress  wf_oos  grid_ok  mc_loss  mc_dd95  nofilter_net  nofilter_trades    status
+19              donchian_trend  ETHUSDT  4h      94  0.138  1.438   0.108   0.651   0.117   0.120    1.000    0.184    0.147         0.138               94  unproven
+20              donchian_trend  SOLUSDT  4h      91  0.167  1.532   0.085   0.683   0.149   0.008    1.000    0.120    0.120         0.167               91  unproven
+39           ma_trend_atr_stop  BTCUSDT  4h      56  0.125  1.746   0.054   0.706   0.114   0.050    1.000    0.192    0.105         0.187               83  unproven
+46               ny_open_drive  ETHUSDT  1h     157  0.095  1.272   0.045   0.610   0.014   0.175    0.741    0.145    0.112         0.096              157  unproven
+51       oi_confirmed_breakout  BTCUSDT  4h      56  0.102  1.555   0.042   0.763   0.090   0.062    0.963    0.163    0.097         0.105               60  unproven
+52       oi_confirmed_breakout  ETHUSDT  4h      67  0.235  2.056   0.042   1.272   0.220   0.233    1.000    0.017    0.075         0.237               67  unproven
+55          oi_divergence_fade  ETHUSDT  4h      31  0.149  3.031   0.034   1.349   0.143   0.096    0.889    0.024    0.041         0.150               31  unproven
+59              oi_reset_trend  SOLUSDT  4h      46  0.455  3.911   0.128   1.175   0.448   0.112    1.000    0.055    0.083         0.457               46  unproven
+65       range_breakout_volume  SOLUSDT  1h     276  0.293  1.265   0.095   0.920   0.181   0.083    0.778    0.078    0.198         0.293              276  unproven
+72           trend_pullback_ma  BTCUSDT  4h      70  0.466  3.034   0.085   1.191   0.447   0.280    0.944    0.064    0.125         0.500               70  unproven
+75                       tsmom  BTCUSDT  4h      61  0.197  2.204   0.048   0.971   0.188   0.039    0.889    0.087    0.095         0.203              105  unproven
+76                       tsmom  ETHUSDT  4h     103  0.143  1.755   0.053   0.796   0.131   0.132    0.667    0.094    0.090         0.142              105  unproven
+77                       tsmom  SOLUSDT  4h      82  0.237  2.324   0.090   0.908   0.228   0.112    1.000    0.141    0.085         0.236               82  unproven
+83        vol_squeeze_breakout  SOLUSDT  4h     171  0.131  1.231   0.079   0.630   0.094   0.122    1.000    0.143    0.145         0.132              171  unproven
+85  week_range_breakout_volume  ETHUSDT  4h      54  0.156  1.993   0.038   1.045   0.145   0.144    1.000    0.029    0.067         0.158               54  unproven
+86  week_range_breakout_volume  SOLUSDT  4h      45  0.094  1.756   0.042   0.765   0.087   0.018    1.000    0.050    0.055         0.094               45  unproven
+
+== setups (books) ==
+                        module                 family  tf                      symbols  pooled_trades  book_net  book_max_dd  book_sharpe  lose_streak  wf_oos_per_year   bear  sideways  s_oos_profit  s_max_dd  s_trades  s_lose_streak  s_bear_sideways  score  proven eligibility
+0        oi_confirmed_breakout          oi_divergence  4h           [BTCUSDT, ETHUSDT]            123     0.337        0.065        1.315            9            0.138  0.014     0.252             5         4         4              3                5     21    True    eligible
+1                        tsmom               baseline  4h  [BTCUSDT, ETHUSDT, SOLUSDT]            246     0.577        0.100        1.169           12            0.133  0.034     0.189             5         4         5              2                5     21   False    eligible
+2           oi_divergence_fade          oi_divergence  4h                    [ETHUSDT]             31     0.149        0.034        1.349            4            0.047  0.068     0.034             3         5         2              5                5     20    True        thin
+3   week_range_breakout_volume  range_breakout_volume  4h           [ETHUSDT, SOLUSDT]             99     0.250        0.043        1.141            7            0.078  0.062     0.141             4         5         3              3                5     20   False    eligible
+4        range_breakout_volume  range_breakout_volume  1h                    [SOLUSDT]            276     0.293        0.095        0.920           12            0.041  0.023     0.160             3         4         5              2                5     19   False    eligible
+5                ny_open_drive           session_open  1h                    [ETHUSDT]            157     0.095        0.045        0.610            9            0.084 -0.011    -0.030             4         5         4              3                2     18   False    eligible
+6         vol_squeeze_breakout               baseline  4h                    [SOLUSDT]            171     0.131        0.079        0.630           10            0.059  0.050    -0.038             4         4         4              2                3     17   False    eligible
+7            ma_trend_atr_stop               baseline  4h                    [BTCUSDT]             56     0.125        0.054        0.706            9            0.024 -0.028     0.121             3         4         3              3                4     17   False    eligible
+8            trend_pullback_ma         trend_pullback  4h                    [BTCUSDT]             70     0.466        0.085        1.191           13            0.131 -0.037     0.240             5         4         3              2                3     17   False    eligible
+9               oi_reset_trend          oi_divergence  4h                    [SOLUSDT]             46     0.455        0.128        1.175           11            0.055  0.113     0.059             4         3         2              2                5     16   False        thin
+10              donchian_trend               baseline  4h           [ETHUSDT, SOLUSDT]            185     0.305        0.156        0.839           18            0.062  0.067    -0.004             4         2         4              1                4     15   False    eligible
+
+== finalists ==
+[
+ {
+  "module": "oi_confirmed_breakout",
+  "symbols": [
+   "BTCUSDT",
+   "ETHUSDT"
+  ],
+  "label": "candidate",
+  "rank": 1,
+  "timeframe": "4h",
+  "params": {
+   "n": 30,
+   "oi_rise": 0.05,
+   "atr_n": 14,
+   "stop_atr": 2.0,
+   "max_hold": 42
+  },
+  "params_source": "DEFAULT_PARAMS",
+  "wf_most_chosen": {
+   "n": 30,
+   "oi_rise": 0.03,
+   "stop_atr": 1.5
+  },
+  "wf_most_chosen_share": 0.25,
+  "wf_most_chosen_differs": true,
+  "grid_stable_80": true
+ },
+ {
+  "module": "tsmom",
+  "symbols": [
+   "BTCUSDT",
+   "ETHUSDT",
+   "SOLUSDT"
+  ],
+  "label": "candidate",
+  "rank": 2,
+  "timeframe": "4h",
+  "params": {
+   "lookback": 180,
+   "eval_hour": 20,
+   "atr_n": 14,
+   "stop_atr": 4.0
+  },
+  "params_source": "DEFAULT_PARAMS",
+  "wf_most_chosen": {
+   "lookback": 120,
+   "stop_atr": 3.0
+  },
+  "wf_most_chosen_share": 0.25,
+  "wf_most_chosen_differs": true,
+  "grid_stable_80": false
+ },
+ {
+  "module": "week_range_breakout_volume",
+  "symbols": [
+   "ETHUSDT",
+   "SOLUSDT"
+  ],
+  "label": "candidate",
+  "rank": 3,
+  "timeframe": "4h",
+  "params": {
+   "range_n": 42,
+   "width_mult": 1.0,
+   "vol_fast": 6,
+   "vol_slow": 42,
+   "vol_ratio": 1.3,
+   "atr_n": 14,
+   "stop_atr": 2.0,
+   "max_hold": 42
+  },
+  "params_source": "DEFAULT_PARAMS",
+  "wf_most_chosen": {
+   "range_n": 42,
+   "vol_ratio": 1.15,
+   "width_mult": 1.0
+  },
+  "wf_most_chosen_share": 0.125,
+  "wf_most_chosen_differs": true,
+  "grid_stable_80": true
+ }
+]

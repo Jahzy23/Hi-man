@@ -1,0 +1,38 @@
+{
+ "opened_utc": "2026-11-18 09:12:08.301091+00:00",
+ "pairs": [
+  [
+   "oi_confirmed_breakout",
+   "BTCUSDT"
+  ],
+  [
+   "oi_confirmed_breakout",
+   "ETHUSDT"
+  ],
+  [
+   "tsmom",
+   "BTCUSDT"
+  ],
+  [
+   "tsmom",
+   "ETHUSDT"
+  ],
+  [
+   "tsmom",
+   "SOLUSDT"
+  ],
+  [
+   "week_range_breakout_volume",
+   "ETHUSDT"
+  ],
+  [
+   "week_range_breakout_volume",
+   "SOLUSDT"
+  ]
+ ],
+ "n_pairs": 7,
+ "window": [
+  "2025-11-01 00:00:00+00:00",
+  "2026-10-31 15:59:00+00:00"
+ ]
+}

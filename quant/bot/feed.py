@@ -94,7 +94,7 @@ class StreamConn(threading.Thread):
     """One websocket connection with its own reader thread and reconnect loop."""
 
     def __init__(self, name: str, url: str, out: "queue.Queue", connect=None, conflate: bool = False,
-                 recv_timeout_s: float = 10.0, max_age_s: float = 12 * 3600.0, clock=time.time):
+                 recv_timeout_s: float = 5.0, max_age_s: float = 12 * 3600.0, clock=time.time):
         super().__init__(name=f"feed-{name}", daemon=True)
         self.conn_name = name
         self.url = url
@@ -115,7 +115,7 @@ class StreamConn(threading.Thread):
 
     def _default_connect(self):
         import websocket  # imported lazily so tests never need the network stack
-        ws = websocket.create_connection(self.url, timeout=10, **proxy_kwargs())
+        ws = websocket.create_connection(self.url, timeout=8, **proxy_kwargs())
         ws.settimeout(self.recv_timeout_s)
         return ws
 

@@ -166,13 +166,21 @@ def main(argv=None) -> int:
                          "holdout = the last 12 months only")
     ap.add_argument("--start", help="overrides --window")
     ap.add_argument("--end", help="overrides --window")
+    ap.add_argument("--exchange-filters", action="store_true",
+                    help="apply the bot's lot step / minimum order size table (UNVERIFIED; phase-2 primary setting)")
     ap.add_argument("--fee-mult", type=float, default=1.0)
     ap.add_argument("--slip-mult", type=float, default=1.0)
     a = ap.parse_args(argv)
     t0 = time.perf_counter()
     w0, w1 = {"full": (None, None), "dev": V.dev_window(), "holdout": V.holdout_window()}[a.window]
+    filters = None
+    if a.exchange_filters:
+        from lab.engine import exchange_filters
+        filters = exchange_filters()
+        if not filters:
+            raise SystemExit("--exchange-filters: bot/instruments.py is not importable")
     summary = run_all(Path(a.strategies), Path(a.out), a.symbols, a.start or w0, a.end or w1,
-                      ExecConfig(fee_mult=a.fee_mult, slip_mult=a.slip_mult))
+                      ExecConfig(fee_mult=a.fee_mult, slip_mult=a.slip_mult, filters=filters))
     n_ok = int((summary["status"] == "ok").sum()) if len(summary) else 0
     print(f"\n{len(summary)} runs ({n_ok} ok, {len(summary) - n_ok} failed) in {time.perf_counter() - t0:.1f}s "
           f"-> {Path(a.out) / 'summary.csv'}")

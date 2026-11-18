@@ -83,8 +83,113 @@ def test_no_second_entry_while_a_position_is_open(tmp_path):
     bot.ticks(at=T0 + 2 * HOUR_MS - 200)
     bot.close_bar(T0 + HOUR_MS)
     assert len(bot.decisions("fill", symbol=B)) == 1
-    assert any("already open" in r for r in reasons(bot.decisions("signal", symbol=B)))
+    assert any("signal dropped: a position was open at the bar close" in r
+               for r in reasons(bot.decisions("signal", symbol=B)))
     assert bot.decisions("block") == []                           # the engine does not even ask Shield
+
+
+# ---------------------------------------------------------------- backtester rule R7: which signals are acted on
+def script(tmp_path, **params):
+    return Bot(tmp_path, setups=[{"id": "leader", "role": "leader", "strategy": "script", "params": params,
+                                  "symbols": [B]}]).start()
+
+
+def test_exit_flag_and_opposite_signal_on_one_row_is_stop_and_reverse(tmp_path):
+    bot = script(tmp_path, long_hours=[0], short_hours=[2], exit_hours=[2])
+    enter_long(bot)
+    bot.ticks(at=T0 + 2 * HOUR_MS - 200, BTCUSDT=60100.0)
+    bot.close_bar(T0 + HOUR_MS, BTCUSDT=60100.0)                  # hour 1: nothing
+    assert bot.pos().side == 1
+    bot.ticks(at=T0 + 3 * HOUR_MS - 200, BTCUSDT=60300.0)
+    bot.close_bar(T0 + 2 * HOUR_MS, BTCUSDT=60300.0)              # hour 2: exit flag AND a short signal
+    t = bot.trades()
+    assert len(t) == 1 and t[0]["exit_reason"] == "signal" and t[0]["exit_time"] == iso(T0 + 3 * HOUR_MS)
+    assert float(t[0]["exit_price"]) == pytest.approx(60300.0 * (1 - BPS))
+    p = bot.pos()
+    assert p.side == -1 and p.entry_ts == T0 + 3 * HOUR_MS and p.signal_bar == T0 + 2 * HOUR_MS   # same open
+    assert p.entry_price == pytest.approx(60300.0 * (1 - BPS)) and p.stop == round(60300.0 * 1.01, 1)
+    equity_after_exit = float(t[0]["equity_after"])
+    assert p.qty == pytest.approx(int(0.005 * equity_after_exit / (p.stop - 60300.0) * 1000 + 1e-9) / 1000)
+    assert any("reversal" in r for r in reasons(bot.decisions("signal")))
+
+
+def test_max_hold_exit_and_new_signal_on_one_row_reenters_at_the_same_open(tmp_path):
+    bot = script(tmp_path, long_hours=[0, 2], max_hold=2)
+    p0 = enter_long(bot)
+    assert p0.time_exit_ts == T0 + 3 * HOUR_MS                    # filled in bar 01:00 (bar 1), held through bar 02:00
+    bot.ticks(at=T0 + 2 * HOUR_MS - 200)
+    bot.close_bar(T0 + HOUR_MS)
+    bot.ticks(at=T0 + 3 * HOUR_MS - 200, BTCUSDT=60200.0)
+    bot.close_bar(T0 + 2 * HOUR_MS, BTCUSDT=60200.0)              # row 02:00: max_hold is up and a new long signal
+    t = bot.trades()
+    assert len(t) == 1 and t[0]["exit_reason"] == "time"
+    p = bot.pos()
+    assert p.id != p0.id and p.side == 1 and p.entry_ts == T0 + 3 * HOUR_MS
+
+
+def test_time_exit_taken_by_a_tick_just_before_the_decision_still_allows_the_new_signal(tmp_path):
+    bot = script(tmp_path, long_hours=[0, 2], max_hold=2)
+    enter_long(bot)
+    bot.ticks(at=T0 + 2 * HOUR_MS - 200)
+    bot.close_bar(T0 + HOUR_MS)
+    bot.ticks(at=T0 + 3 * HOUR_MS + 150, BTCUSDT=60200.0)         # first quote of the new bar arrives before the kline
+    assert bot.pos() is None and bot.trades()[0]["exit_reason"] == "time"
+    bot.close_bar(T0 + 2 * HOUR_MS, BTCUSDT=60200.0, at=T0 + 3 * HOUR_MS + 400)
+    assert bot.pos() is not None and bot.pos().entry_ts >= T0 + 3 * HOUR_MS
+
+
+def test_signal_on_the_row_whose_bar_stopped_the_position_out_is_acted_on(tmp_path):
+    bot = script(tmp_path, long_hours=[0, 1])
+    enter_long(bot)
+    bot.tick(B, 59300.0, at=T0 + HOUR_MS + 10 * MIN)              # stopped inside bar 01:00
+    assert bot.pos() is None
+    bot.ticks(at=T0 + 2 * HOUR_MS - 200)
+    bot.close_bar(T0 + HOUR_MS)                                   # flat at the close of row 01:00: its signal counts
+    assert bot.pos() is not None and bot.pos().signal_bar == T0 + HOUR_MS
+
+
+def test_stop_hit_after_the_bar_close_but_before_the_decision_drops_that_rows_signal(tmp_path):
+    bot = script(tmp_path, long_hours=[0, 1])
+    enter_long(bot)
+    bot.ticks(at=T0 + 2 * HOUR_MS - 200)
+    bot.tick(B, 59300.0, at=T0 + 2 * HOUR_MS + 150)               # the new bar opens through the stop
+    assert bot.pos() is None and bot.trades()[0]["exit_reason"] == "stop"
+    bot.ticks(at=T0 + 2 * HOUR_MS + 250, BTCUSDT=59300.0)
+    bot.close_bar(T0 + HOUR_MS, at=T0 + 2 * HOUR_MS + 400, BTCUSDT=59300.0)
+    assert bot.pos() is None                                      # the position was open at that close: R7 drops it
+    assert any("signal dropped" in r for r in reasons(bot.decisions("signal")))
+
+
+def test_reversal_waits_when_the_exit_has_no_quote(tmp_path):
+    bot = script(tmp_path, long_hours=[0], short_hours=[1], exit_hours=[1])
+    enter_long(bot)
+    bot.close_bar(T0 + HOUR_MS, at=T0 + 2 * HOUR_MS + 300)        # last quote is an hour old
+    assert bot.pos().side == 1 and bot.pos().flatten_reason == "signal"
+    assert any("still waiting for a quote" in r for r in reasons(bot.decisions("signal")))
+    bot.ticks(at=T0 + 2 * HOUR_MS + 2000)
+    assert bot.pos() is None and bot.trades()[0]["exit_reason"] == "signal"
+
+
+def test_exit_flag_while_flat_does_not_cancel_a_resting_entry(tmp_path):
+    bot = script(tmp_path, long_hours=[0], exit_hours=[1], limit_pct=0.002, entry_valid=3)
+    bot.ticks(at=T0 + HOUR_MS - 200)
+    bot.close_bar(T0)
+    assert bot.order() is not None
+    bot.ticks(at=T0 + 2 * HOUR_MS - 200)
+    bot.close_bar(T0 + HOUR_MS)                                   # exit flag, but nothing is open
+    assert bot.order() is not None and bot.decisions("cancel") == []
+
+
+def test_limit_through_the_market_on_arrival_is_sized_and_filled_at_the_market(tmp_path):
+    """R1: 'limit = close' with the market already below it would otherwise be a free maker fill."""
+    bot = script(tmp_path, long_hours=[0], limit_pct=0.0005)      # limit 59970.0 for a close of 60000
+    bot.ticks(at=T0 + HOUR_MS - 200, BTCUSDT=59900.0)             # but the next bar opens at 59900.0 / 59900.1
+    bot.close_bar(T0, BTCUSDT=60000.0)
+    p = bot.pos()
+    assert p.entry_type == "limit_marketable" and p.entry_price == pytest.approx(59900.1 * (1 + BPS))
+    assert p.stop == round(59970.0 * 0.99, 1)
+    assert p.qty == int(5.0 / (59900.1 - p.stop) * 1000) / 1000   # sized from the price it really pays
+    assert bot.decisions("fill")[0]["liquidity"] == "taker"
 
 
 def test_limit_entry_rests_then_fills_on_trade_through_and_expires_otherwise(tmp_path):
@@ -351,16 +456,16 @@ def test_funding_is_charged_once_at_the_settlement_and_recorded_on_the_bar(tmp_p
         bot.close_bar(T0 + i * HOUR_MS)
     bot.mark(B, 0.00031, nxt, mark=60500.0, at=nxt - 900)          # last estimate before the settlement
     bot.tick(B, 60500.0, at=nxt - 200)
-    assert bot.decisions("funding") == []
+    assert bot.decisions("funding", symbol=B) == []
     bot.tick(B, 60500.0, at=nxt + 150)                             # first tick after the funding time
-    f = bot.decisions("funding")
+    f = bot.decisions("funding", symbol=B)
     assert len(f) == 1 and f[0]["rate"] == 0.00031 and not f[0]["estimated"]
     amount = -p.qty * 60500.0 * 0.00031
     assert bot.engine.broker.equity("leader") == pytest.approx(cash0 + amount)
     bot.mark(B, 0.0001, nxt + 8 * HOUR_MS, at=nxt + 900)           # the stream moves on to the next period
     bot.close_bar(T0 + 7 * HOUR_MS, at=nxt + 1200)                 # the bar that closed on the settlement
     bot.tick(B, 60500.0, at=nxt + 5000)
-    assert len(bot.decisions("funding")) == 1                      # not charged twice
+    assert len(bot.decisions("funding", symbol=B)) == 1                      # not charged twice
     last = bot.engine.history.frame(B).iloc[-1]
     assert last["funding_paid"] == 0.00031 and last["funding_rate"] == 0.00031
     assert bot.engine.history.frame(B)["funding_paid"].iloc[-2] == 0.0
@@ -377,10 +482,83 @@ def test_funding_settlement_without_positions_is_still_logged(tmp_path):
 def test_stale_mark_data_means_the_bar_funding_is_unknown_not_zero(tmp_path):
     bot = Bot(tmp_path, setups=[{"id": "leader", "strategy": "always", "params": {"only_hour": 5}, "symbols": [B]}]).start()
     bot.mark(B, 0.0001, T0 + 8 * HOUR_MS, at=T0 + HOUR_MS - 30_000)   # last mark 30 s before the close
-    bot.ticks(at=T0 + HOUR_MS - 200)
-    bot.close_bar(T0)
+    bot.tick(B, 60000.0, at=T0 + HOUR_MS - 200)
+    bot.close_bar(T0, syms=[B])
     last = bot.engine.history.frame(B).iloc[-1]
     assert pd.isna(last["funding_paid"]) and pd.isna(last["funding_rate"])
+
+
+def test_bar_closing_right_after_the_bot_started_has_unknown_funding(tmp_path):
+    """Started seconds after a funding time: the stream already points at the NEXT settlement, but the one
+    that may just have happened on this bar's close was never seen. Unknown, not 0.0."""
+    bot = Bot(tmp_path, setups=[{"id": "leader", "strategy": "always", "params": {"only_hour": 5}, "symbols": [B]}],
+              now=T0 + HOUR_MS + 400).start()
+    bot.mark(B, 0.0001, T0 + 9 * HOUR_MS, at=T0 + HOUR_MS + 700)      # first mark arrives after the close instant
+    bot.tick(B, 60000.0, at=T0 + HOUR_MS + 800)
+    bot.close_bar(T0, syms=[B], at=T0 + HOUR_MS + 1000)
+    assert pd.isna(bot.engine.history.frame(B)["funding_paid"].iloc[-1])
+    bot.mark(B, 0.0001, T0 + 9 * HOUR_MS, at=T0 + 2 * HOUR_MS - 1000)
+    bot.tick(B, 60000.0, at=T0 + 2 * HOUR_MS - 200)
+    bot.close_bar(T0 + HOUR_MS, syms=[B])                             # watched the whole hour: now it is a real 0.0
+    f = bot.engine.history.frame(B)
+    assert f["funding_paid"].iloc[-1] == 0.0 and pd.isna(f["funding_rate"].iloc[-1])
+
+
+def test_silent_kline_connection_is_a_stale_feed(tmp_path):
+    bot = Bot(tmp_path).start()
+    t = bot.now
+    for s in range(0, 62):                                            # quotes keep coming, markPrice/klines do not
+        for sym, px in (("BTCUSDT", 60000.0), ("ETHUSDT", 1800.0), ("SOLUSDT", 75.0)):
+            bot.tick(sym, px, at=t + s * 1000)
+        bot.timer()
+    assert bot.halts() == ["stale_feed"]
+    assert "@mark" in bot.engine.shield.halts[0]["reason"]
+
+
+def test_restart_during_a_stale_halt_does_not_shortcut_the_five_minutes(tmp_path):
+    bot = Bot(tmp_path).start()
+    bot.ticks()
+    bot.timer(at=bot.now + 61_000)                                    # nothing for 61 s
+    assert bot.halts() == ["stale_feed"]
+    for s in range(1, 200):                                           # healthy for 199 s ...
+        bot.ticks(at=bot.now + 1000)
+        bot.timer()
+    assert bot.halts() == ["stale_feed"]
+    bot.kill()
+    bot.restart(at=bot.now + 5000)                                    # ... then a quick restart
+    for s in range(1, 290):
+        bot.ticks(at=bot.now + 1000)
+        bot.timer()
+    assert bot.halts() == ["stale_feed"]                              # the 5 minutes start again after the restart
+    for s in range(1, 15):
+        bot.ticks(at=bot.now + 1000)
+        bot.timer()
+    assert bot.halts() == []
+
+
+def test_position_on_a_symbol_removed_from_the_config_is_flagged(tmp_path):
+    bot = Bot(tmp_path, setups=[{"id": "leader", "strategy": "always", "symbols": ["SOLUSDT"]}]).start()
+    bot.ticks(at=T0 + HOUR_MS - 200)
+    bot.close_bar(T0)
+    assert bot.pos("SOLUSDT") is not None
+    bot.timer(at=bot.now + 2000)
+    bot.kill()
+    bot.cfg_over["symbols"] = ["BTCUSDT", "ETHUSDT"]
+    bot.restart(at=bot.now + 5000, setups=[{"id": "leader", "strategy": "always", "symbols": ["BTCUSDT"]}])
+    fl = bot.decisions("flag")
+    assert len(fl) == 1 and "no price feed" in fl[0]["reason"] and fl[0]["symbol"] == "SOLUSDT"
+    assert any(k.startswith("orphan_position") for k in bot.engine.shield.status()["flags"])
+
+
+def test_strategy_that_cannot_be_probed_is_refused(tmp_path):
+    bot = Bot(tmp_path, setups=[{"id": "leader", "strategy": "always", "symbols": [B]}])
+    bot.funding_archive = bot.funding_archive.iloc[:0]               # no archived funding at all: nothing is fully known
+    bot.start()
+    assert set(bot.engine.strategies["leader"].needs[B]) == {"funding_paid", "funding_rate", "oi", "oi_value",
+                                                              "top_ls_ratio", "acct_ls_ratio"}
+    bot.ticks(at=T0 + HOUR_MS - 200)
+    bot.close_bar(T0)
+    assert len(bot.decisions("refuse")) == 1 and bot.pos() is None
 
 
 # ---------------------------------------------------------------- restarts
@@ -464,7 +642,7 @@ def test_funding_settled_during_an_outage_is_charged_as_an_estimate(tmp_path):
     bot.timer(at=T0 + HOUR_MS + 6000)
     bot.kill()
     bot.restart(at=nxt + 30_000)                                  # down across the settlement
-    f = bot.decisions("funding")
+    f = bot.decisions("funding", symbol=B)
     assert len(f) == 1 and f[0]["estimated"] and "ESTIMATED" in f[0]["reason"]
     bot.tick(B, 60000.0, at=nxt + 31_000)
     assert "funding_estimated" in bot.trades()[0]["flags"]
@@ -633,7 +811,7 @@ def test_heartbeat_on_start_and_every_five_minutes_on_the_clock(tmp_path):
     hb = bot.decisions("heartbeat")
     assert len(hb) == 2 and hb[1]["ts"].startswith("2026-11-18T01:00:00")
     assert "alive" in hb[1]["reason"] and "shield ok" in hb[1]["reason"] and "WARMING" not in hb[0]["reason"]
-    assert set(hb[1]["tick_age_s"]) == set(SYMS) and hb[1]["equity"] == {"leader": 1000.0}
+    assert set(hb[1]["tick_age_s"]) == set(SYMS) | {f"{x}@mark" for x in SYMS} and hb[1]["equity"] == {"leader": 1000.0}
     bot.ticks(at=T0 + 65 * MIN + 100)
     bot.timer()
     assert len(bot.decisions("heartbeat")) == 3

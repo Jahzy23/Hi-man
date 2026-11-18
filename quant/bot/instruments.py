@@ -7,6 +7,7 @@ a wrong min notional makes small orders fail with -4164.
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from decimal import ROUND_CEILING, ROUND_FLOOR, ROUND_HALF_EVEN, Decimal
 
@@ -42,12 +43,14 @@ def round_price(symbol: str, price: float, mode: str = "nearest") -> float:
 
 
 def floor_qty(symbol: str, qty: float) -> float:
-    """Round a quantity DOWN to the step grid (never up: rounding up would exceed the risk budget)."""
+    """Round a quantity DOWN to the step grid (never up: rounding up would exceed the risk budget).
+    Same arithmetic as lab.engine (rule R12): floor(q / step + 1e-9) steps, so a quantity that is a
+    whole number of steps up to float noise is not pushed one step down."""
     ins = INSTRUMENTS[symbol]
-    if not qty > 0:
+    if not qty > 0 or not math.isfinite(qty):
         return 0.0
-    n = (_d(qty) / ins.step).to_integral_value(rounding=ROUND_FLOOR)
-    return float(n * ins.step)
+    n = math.floor(qty / float(ins.step) + 1e-9)
+    return float(Decimal(n) * ins.step)
 
 
 def on_tick(symbol: str, price: float) -> bool:

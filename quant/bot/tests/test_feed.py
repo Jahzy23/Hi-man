@@ -159,5 +159,5 @@ def test_default_connect_passes_proxy_settings_to_websocket_client(monkeypatch):
     monkeypatch.setenv("HTTPS_PROXY", "http://u:p@h:1")
     c = StreamConn("public", "wss://example/stream", queue.Queue())
     c._default_connect()
-    assert seen["url"] == "wss://example/stream" and seen["kw"]["http_proxy_host"] == "h" and seen["timeout"] == 10.0
+    assert seen["url"] == "wss://example/stream" and seen["kw"]["http_proxy_host"] == "h" and seen["timeout"] == 5.0
     assert json.dumps(feed.HOST)

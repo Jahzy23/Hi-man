@@ -22,7 +22,7 @@ import numpy as np
 from . import instruments
 from .archive import ArchiveRefresher, RefreshWorker, days_of
 from .config import Config
-from .history import HOUR_MS, History, index_ms, month_after
+from .history import HOUR_MS, MAYBE_UNKNOWN, History, index_ms
 from .instruments import round_price
 from .journal import Journal
 from .models import Intent
@@ -54,6 +54,7 @@ class FundingState:
     settled_ms: int = 0                    # last settlement we processed
     settled_rate: float | None = None      # its rate, None when it was not observed live
     settled_observed: bool = False
+    watch_from_ms: int | None = None       # start of the current gap-free run of markPrice messages
 
 
 class Engine:
@@ -73,6 +74,7 @@ class Engine:
         self.worker = refresher            # RefreshWorker or None (tests)
         self.ticks = {s: Tick() for s in cfg.symbols}
         self.funding = {s: FundingState() for s in cfg.symbols}
+        self._mark_seen = {s: False for s in cfg.symbols}     # in THIS run (persisted times do not count)
         self.pending: dict[int, set] = {}
         self._decided: set = set()
         self.feed_stats: dict = {}
@@ -93,7 +95,10 @@ class Engine:
     def startup(self, now: int) -> None:
         cfg = self.cfg
         self.started_ms = now
-        prev = read_json(self.state_dir / "status.json") or {}
+        try:
+            prev = read_json(self.state_dir / "status.json") or {}
+        except ValueError:
+            prev = {}                    # only a snapshot: unreadable means "last alive unknown"
         self.last_alive_ms = prev.get("ts_ms")
         self._load_funding_state()
         self.shield.check_clock(now)
@@ -107,6 +112,12 @@ class Engine:
         self.broker.startup_events = []
         self._reconcile_ledger(now)
         self._recover_after_outage(now)
+        for p in self.broker.open_positions():
+            if p.symbol not in cfg.symbols:
+                why = (f"position {p.id} on {p.symbol} has no price feed: {p.symbol} is no longer in the config's "
+                       f"symbols. Add it back so the position can be closed.")
+                self.journal.decision("flag", why, setup=p.setup, symbol=p.symbol, ts=now)
+                self.shield.flag("orphan_position", why, setup=p.setup, symbol=p.symbol, now_ms=now)
         self._probe_strategies(now)
         for sym in cfg.symbols:
             s = self.history.summary(sym, now)
@@ -166,7 +177,10 @@ class Engine:
                 if f.last_r is not None and f.last_mark is not None:
                     ev = self.broker.on_funding(sym, f.last_r, f.last_mark, f.next_ms, estimated=True)
                     self._handle_events(ev, now)
-                f.settled_ms, f.settled_rate, f.settled_observed, f.next_ms = f.next_ms, None, False, None
+                f.settled_ms, f.next_ms = f.next_ms, None
+            if f.next_ms is None:        # cannot prove that nothing settled while we were away
+                f.settled_rate, f.settled_observed = None, False
+            f.watch_from_ms = None
         if not positions and not orders:
             return
         limit = self.cfg.shield.stale_feed_s * 1000
@@ -196,8 +210,9 @@ class Engine:
             end = min(f.index[-1] for f in frames.values()) if n else None
             frames = {s: f.loc[:end] for s, f in frames.items()} if n else frames
             for sym in setup.symbols:
-                if not n:
-                    strat.needs[sym], strat.uses_ctx[sym] = {}, True
+                if not n:                # no fully known rows to probe on: assume it reads everything
+                    strat.needs[sym] = {c: "could not be probed (no fully known history)" for c in MAYBE_UNKNOWN}
+                    strat.uses_ctx[sym] = True
                     continue
                 strat.needs[sym], strat.uses_ctx[sym] = probe(strat, sym, frames)
             needs = sorted({c for d in strat.needs.values() for c in d})
@@ -245,13 +260,17 @@ class Engine:
         if f is None:
             return
         self.counters["marks"] += 1
+        self._mark_seen[sym] = True
         if e_ms - now > self.cfg.shield.max_clock_skew_s * 1000:
             self.shield.check_clock(now, e_ms)
             return
         self._settle_if_due(sym, e_ms, now)          # uses the rate seen BEFORE this message
+        if f.last_r_e_ms is None or e_ms - f.last_r_e_ms > FUNDING_FRESH_MS:
+            f.watch_from_ms = e_ms                   # a gap: what happened in it was not observed
         f.last_mark, f.last_r, f.last_r_e_ms = mark, rate, e_ms
         if next_ms > f.settled_ms and next_ms > e_ms:
             f.next_ms = next_ms
+        self.broker.set_funding_outlook(sym, rate, f.next_ms)
 
     def _settle_if_due(self, sym: str, ts: int, now: int) -> None:
         f = self.funding[sym]
@@ -299,12 +318,13 @@ class Engine:
         self._settle_if_due(sym, close_ms, now)
         f = self.funding[sym]
         fresh = f.last_r_e_ms is not None and close_ms - f.last_r_e_ms <= FUNDING_FRESH_MS
+        watched = fresh and f.watch_from_ms is not None and f.watch_from_ms < close_ms
         if f.settled_ms == close_ms:
             paid = f.settled_rate if f.settled_observed else None
-        elif fresh and f.next_ms is not None and f.next_ms > close_ms:
-            paid = 0.0                   # we were watching and no settlement fell on this close
+        elif watched and f.next_ms is not None and f.next_ms > close_ms:
+            paid = 0.0                   # we were watching from before the close and nothing settled on it
         else:
-            paid = None
+            paid = None                  # e.g. started just after a funding time: it may have settled unseen
         rate = f.settled_rate if f.settled_observed else None
         bar = {"time_ms": t, "open": float(k["o"]), "high": float(k["h"]), "low": float(k["l"]),
                "close": float(k["c"]), "volume": float(k["v"]), "quote_volume": float(k["q"]),
@@ -383,63 +403,81 @@ class Engine:
         self.shield.clear_flag("refuse", setup=sid, symbol=sym)
         # 3. the decision is the last closed row of signals() on the full frame
         df = self.history.frame(sym, strat.tf)
-        ctx = {s: self.history.frame(s, strat.tf) for s in self.cfg.symbols}
+        last = df.index[-1]              # == sig_bar (ready() checked it); nothing later may reach the strategy
+        ctx = {s: self.history.frame(s, strat.tf).loc[:last] for s in self.cfg.symbols}
         d = evaluate(strat, df, ctx)
         if self.on_decision is not None:
             self.on_decision(sid, sym, d)
         if d.bar_ms != sig_bar:
             raise RuntimeError(f"{sid}/{sym}: decision row {iso(d.bar_ms)} is not the closed bar {iso(sig_bar)}")
-        exposure = self.broker.has_exposure(sid, sym)
+        # 4. backtester rule R7. A signal is acted on when the book was flat at the bar close, or when
+        #    this very row schedules the exit of the open position (exit flag / max_hold): the position
+        #    leaves at the open and the new signal goes in at the same open (stop-and-reverse).
+        #    Any other signal that arrives while a position is open is dropped; so is a signal while an
+        #    entry limit is still resting.
+        book = self.broker.book(sid)
         sig = dict(side=d.side, entry=d.entry, stop=d.stop, target=d.target, exit_flag=d.exit)
-        if exposure == "position":
-            if d.exit:
-                self.journal.decision("signal", "exit signal at bar close while in a position: exiting at market",
-                                      **common, **sig)
-                ev = self.broker.close_position(sid, sym, "signal", self.shield.approve_exit(sid, sym, "signal"),
-                                                max(close_ms, self.ticks[sym].e_ms),
-                                                max_quote_age_ms=int(self.cfg.shield.max_tick_age_s * 1000))
-                if not ev:
-                    self.journal.decision("exit_pending", "no fresh quote for the signal exit: it executes at the "
-                                                          "next tick", **common)
-                self._handle_events(ev, now)
-            elif d.side != 0:
-                self.journal.decision("signal", f"{_side(d.side)} signal ignored: a position is already open "
-                                                f"(one per setup and symbol)", **common, **sig)
-            else:
-                self.journal.decision("eval", "in a position; no exit signal at bar close", **common)
-            self.broker.set_last_decision(sid, sym, sig_bar)
-        elif d.side != 0 and exposure == "order":
+        pos = book.positions.get(sym)
+        last_exit = book.last_exit.get(sym)
+        closed_after_close = pos is None and last_exit is not None and last_exit["ts"] >= close_ms
+        open_at_close = pos is not None or closed_after_close
+        if pos is not None:
+            time_due = pos.time_exit_ts is not None and pos.time_exit_ts <= close_ms
+            exit_due = d.exit or time_due
+        else:
+            exit_due = closed_after_close and (d.exit or bool(last_exit.get("scheduled")))
+        if pos is not None and exit_due:
+            reason = "signal" if d.exit else "time"
+            self.journal.decision("signal", f"{'exit signal' if d.exit else 'max_hold reached'} at the bar close: "
+                                            f"exiting at the open", **common, **sig)
+            ev = self.broker.close_position(sid, sym, reason, self.shield.approve_exit(sid, sym, reason),
+                                            max(close_ms, self.ticks[sym].e_ms),
+                                            max_quote_age_ms=int(self.cfg.shield.max_tick_age_s * 1000))
+            if not ev:
+                self.journal.decision("exit_pending", "no fresh quote for the exit: it executes at the next tick",
+                                      **common)
+            self._handle_events(ev, now)
+        if d.side == 0:
+            if not (pos is not None and exit_due):
+                self.journal.decision("eval", "in a position; no exit signal at bar close" if pos is not None
+                                      else "no signal at bar close", **common)
+        elif open_at_close and not exit_due:
+            self.journal.decision("signal", f"{_side(d.side)} signal dropped: a position was open at the bar close "
+                                            f"and this row does not schedule its exit (one position per setup and "
+                                            f"symbol)", **common, **sig)
+        elif self.broker.has_exposure(sid, sym) == "position":
+            self.journal.decision("signal", f"{_side(d.side)} signal not entered: the exit of the old position is "
+                                            f"still waiting for a quote", **common, **sig)
+        elif self.broker.has_exposure(sid, sym) == "order":
             self.journal.decision("signal", f"{_side(d.side)} signal ignored: an entry order is already resting",
                                   **common, **sig)
-            self.broker.set_last_decision(sid, sym, sig_bar)
-        elif d.side != 0:
-            self._enter(setup, strat, sym, d, sig_bar, close_ms, now, common)
-            self.broker.set_last_decision(sid, sym, sig_bar)
         else:
-            self.journal.decision("eval", "no signal at bar close", **common)
-            self.broker.set_last_decision(sid, sym, sig_bar)
+            self._enter(setup, strat, sym, d, sig_bar, close_ms, now, common,
+                        reversal=open_at_close and exit_due)
+        self.broker.set_last_decision(sid, sym, sig_bar)
 
-    def _enter(self, setup, strat, sym, d, sig_bar, close_ms, now, common) -> None:
+    def _enter(self, setup, strat, sym, d, sig_bar, close_ms, now, common, reversal: bool = False) -> None:
         sid, cfg = setup.id, self.cfg
         tk = self.ticks[sym]
         quote = (tk.bid, tk.ask, tk.e_ms) if tk.e_ms else None
-        slip = cfg.slip(sym)
         stop = round_price(sym, d.stop) if d.stop is not None and d.stop > 0 else None
         target = round_price(sym, d.target) if d.target is not None and d.target > 0 else None
+        market_px = None if quote is None else (tk.ask if d.side > 0 else tk.bid)   # where a taker fills now
         if d.entry is None:
-            entry = None
-            ref = None if quote is None else (tk.ask * (1 + slip) if d.side > 0 else tk.bid * (1 - slip))
+            entry, ref = None, market_px                 # R9: sized from the price seen when the order is sent
         else:
             # a passive limit is never rounded towards the market
             entry = round_price(sym, d.entry, "down" if d.side > 0 else "up") if d.entry > 0 else d.entry
-            ref = entry
+            through = market_px is not None and (market_px <= entry if d.side > 0 else market_px >= entry)
+            ref = market_px if through else entry        # R1: through the market on arrival = taker at the market
         equity = self.broker.equity(sid)
         qty = position_size(sym, equity, ref, stop, cfg.risk_per_trade, cfg.max_leverage) if ref and stop else 0.0
         intent = Intent(id=f"{sid}:{sym}:{iso(sig_bar)}", setup=sid, symbol=sym, side=d.side, qty=qty, entry=entry,
                         ref_price=ref or 0.0, stop=stop, target=target, max_hold=d.max_hold,
                         entry_valid=d.entry_valid, tf=strat.tf, signal_bar=sig_bar, placed_ts=close_ms)
         self.journal.decision(
-            "signal", f"{_side(d.side)} signal at the close of {iso(sig_bar)}: "
+            "signal", f"{_side(d.side)} signal at the close of {iso(sig_bar)}"
+                      f"{' (reversal: the old position left at this open)' if reversal else ''}: "
                       f"{'marketable' if entry is None else f'limit {entry}'}, stop {stop}, target {target}, "
                       f"size {qty} (risk {cfg.risk_per_trade:.2%} of {equity:.2f})",
             **common, side=d.side, qty=qty, entry=entry, stop=stop, target=target,
@@ -482,6 +520,9 @@ class Engine:
         sh.check_clock(now)
         sh.poll_files(now)
         ages = {s: (now - max(t.e_ms, self.started_ms)) / 1000.0 for s, t in self.ticks.items()}
+        for s, f in self.funding.items():        # markPrice arrives every second on the kline connection
+            seen = f.last_r_e_ms if self._mark_seen[s] else 0
+            ages[f"{s}@mark"] = (now - max(seen, self.started_ms)) / 1000.0
         sh.check_feed(ages, now)
         for book in self.broker.active_books():
             sh.check_equity(book.id, self.broker.mark_equity(book.id), now)
@@ -510,7 +551,7 @@ class Engine:
         if not first and slot == self._last_hb_slot:
             return
         self._first_hb_done, self._last_hb_slot = True, slot
-        worst = max(ages.values()) if ages else None
+        worst = max(ages.values()) if ages else 0.0
         n_pos, n_ord = len(self.broker.open_positions()), len(self.broker.open_orders())
         last_closed = now - now % HOUR_MS - HOUR_MS
         missing = {s: len(self.history.missing_bars(s, last_closed)) for s in self.cfg.symbols}
@@ -542,7 +583,7 @@ class Engine:
                 self.worker.request(sym, days, months)
 
     def _missing_funding_months(self, sym: str, today: dt.date) -> list:
-        cov_end = self.history._static[sym][2]           # first instant not covered by archived funding
+        cov_end = self.history.funding_coverage_end(sym)  # first instant not covered by archived funding
         out, y, m = [], cov_end.year, cov_end.month
         while (y, m) < (today.year, today.month):         # only complete months can be published
             out.append((y, m))
@@ -571,7 +612,10 @@ class Engine:
 
     # ================================================================== persistence of small things
     def _load_funding_state(self) -> None:
-        raw = read_json(self.state_dir / "market.json") or {}
+        try:
+            raw = read_json(self.state_dir / "market.json") or {}
+        except ValueError:
+            raw = {}
         for sym, d in raw.get("funding", {}).items():
             if sym in self.funding:
                 self.funding[sym] = FundingState(**{k: v for k, v in d.items()

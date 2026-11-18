@@ -85,13 +85,13 @@ def test_stop_is_live_on_the_very_tick_of_the_fill(broker):
     assert t.exit_price == pytest.approx(59300.0 * (1 - 2 * BPS))
 
 
-def test_limit_marketable_at_placement_is_a_taker_fill_not_above_limit(broker):
+def test_limit_marketable_at_placement_is_a_taker_fill_at_the_market(broker):
     i = make_intent(entry=60150.0, stop=59500.0)         # ask is 60100.1, limit is above it
     ev = broker.submit_entry(i, approve(i), T0)
     assert kinds(ev) == ["fill"]
     p = broker.book("leader").positions["BTCUSDT"]
-    assert p.entry_type == "market"
-    assert p.entry_price == pytest.approx(min(60150.0, 60100.1 * (1 + BPS)))
+    assert p.entry_type == "limit_marketable"                    # backtester rule R1
+    assert p.entry_price == pytest.approx(60100.1 * (1 + BPS))
     assert p.entry_fee == pytest.approx(p.qty * p.entry_price * TAKER)
 
 
@@ -237,6 +237,77 @@ def test_signal_exit_is_a_taker_market_exit(broker):
     broker.on_book("BTCUSDT", 60500.0, 60500.1, T0 + HOUR_MS)
     t = trade_of(broker.close_position("leader", "BTCUSDT", "signal", approve("exit:leader:BTCUSDT"), T0 + HOUR_MS))
     assert t.exit_reason == "signal" and t.exit_price == pytest.approx(60500.0 * (1 - BPS))
+
+
+def test_scheduled_exit_beyond_the_target_fills_the_resting_target(broker):
+    """R5: at a signal/time exit the price is already past the target -> the target (maker) is what filled."""
+    open_long(broker)
+    broker.quotes["BTCUSDT"] = (61300.0, 61300.1, T0 + HOUR_MS)         # as after a feed gap: no tick was processed
+    t = trade_of(broker.close_position("leader", "BTCUSDT", "signal", approve("exit:leader:BTCUSDT"), T0 + HOUR_MS))
+    assert t.exit_reason == "target" and t.exit_price == 61200.0
+    assert t.fees == pytest.approx(0.008 * 60000.0 * MAKER + 0.008 * 61200.0 * MAKER)
+
+
+def test_scheduled_exit_beyond_the_stop_is_booked_as_a_stop(broker):
+    open_long(broker)
+    broker.quotes["BTCUSDT"] = (59100.0, 59100.1, T0 + HOUR_MS)
+    t = trade_of(broker.close_position("leader", "BTCUSDT", "time", approve("exit:leader:BTCUSDT"), T0 + HOUR_MS))
+    assert t.exit_reason == "stop" and t.exit_price == pytest.approx(59100.0 * (1 - 2 * BPS))
+
+
+def test_target_beats_a_pending_flatten_and_a_due_time_exit(broker):
+    open_long(broker, max_hold=1)
+    broker.flatten(None, "halt:stale_feed", T0 + 5 * HOUR_MS, max_quote_age_ms=1000)     # stale quote: pending
+    t = trade_of(broker.on_book("BTCUSDT", 61250.0, 61250.1, T0 + 5 * HOUR_MS + 1000))
+    assert t.exit_reason == "target" and t.exit_price == 61200.0
+    assert broker.book("leader").last_exit["BTCUSDT"] == {"ts": T0 + 5 * HOUR_MS + 1000, "reason": "target",
+                                                          "scheduled": True}
+
+
+# ---------------------------------------------------------------- backtester rule R10: funding on the exit bar
+def test_stop_inside_a_bar_that_ends_on_a_settlement_pays_that_funding_if_it_is_a_cost(broker):
+    open_long(broker)
+    settle = T0 + 8 * HOUR_MS
+    broker.set_funding_outlook("BTCUSDT", 0.0005, settle)
+    t = trade_of(broker.on_book("BTCUSDT", 59400.0, 59400.1, settle - 30 * 60_000))     # inside the 07:00 bar
+    assert t.exit_reason == "stop"
+    assert t.funding == pytest.approx(-0.008 * 59400.0 * 0.0005) and "funding_partial_bar_est" in t.flags
+    assert t.net == pytest.approx(t.gross - t.fees + t.funding)
+    assert broker.equity("leader") == pytest.approx(1000.0 + t.net)
+    assert broker.on_funding("BTCUSDT", 0.0005, 59400.0, settle) == []                  # and never again
+
+
+@pytest.mark.parametrize("case", ["bar_before", "credit", "at_open_gap", "signal_exit", "no_outlook"])
+def test_no_exit_bar_funding_in_the_other_cases(broker, case):
+    settle = T0 + 8 * HOUR_MS
+    if case == "credit":                                         # a short would RECEIVE positive funding: never credited
+        i = make_intent(side=-1, entry=60200.0, stop=60800.0, target=59000.0)
+        broker.submit_entry(i, approve(i), T0)
+        broker.on_book("BTCUSDT", 60200.0, 60200.1, T0 + 1000)
+        broker.set_funding_outlook("BTCUSDT", 0.0005, settle)
+        t = trade_of(broker.on_book("BTCUSDT", 60800.0, 60800.1, settle - 1000))
+    else:
+        open_long(broker)
+        if case != "no_outlook":
+            broker.set_funding_outlook("BTCUSDT", 0.0005, settle)
+        if case == "bar_before":                                 # the 06:00 bar does not end on the settlement
+            t = trade_of(broker.on_book("BTCUSDT", 59400.0, 59400.1, settle - 90 * 60_000))
+        elif case == "at_open_gap":                              # stopped at the open instant of the bar (R4)
+            t = trade_of(broker.on_book("BTCUSDT", 59300.0, 59300.1, settle - HOUR_MS))
+        elif case == "signal_exit":
+            broker.on_book("BTCUSDT", 60100.0, 60100.1, settle - 1000)
+            t = trade_of(broker.close_position("leader", "BTCUSDT", "signal", approve("exit:leader:BTCUSDT"), settle - 1000))
+        else:
+            t = trade_of(broker.on_book("BTCUSDT", 59400.0, 59400.1, settle - 1000))
+    assert t.funding == 0.0 and "funding_partial_bar_est" not in t.flags
+
+
+def test_exit_bar_funding_uses_the_strategy_timeframe_and_applies_to_targets(broker):
+    open_long(broker, tf="4h", entry_valid=1)
+    settle = T0 + 8 * HOUR_MS
+    broker.set_funding_outlook("BTCUSDT", 0.0002, settle)
+    t = trade_of(broker.on_book("BTCUSDT", 61200.0, 61200.1, T0 + 4 * HOUR_MS + 60_000))   # 4h bar 04:00-08:00
+    assert t.exit_reason == "target" and t.funding == pytest.approx(-0.008 * 61200.0 * 0.0002)
 
 
 def test_close_position_requires_shield_approval(broker):

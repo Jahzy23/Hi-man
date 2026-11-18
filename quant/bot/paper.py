@@ -18,6 +18,13 @@ How SPEC's bar rules map onto book ticks (documented in BUILD_LOG.md, section Ar
   same instant          the stop is checked before the target and before the time exit.
 Shorts are the mirror image. Slippage-adjusted fill prices are model prices and are not snapped to
 the tick grid; order prices (limit, stop, target) and quantities are.
+
+The backtester (lab/engine.py) lists the choices it made where SPEC is silent as rules R1-R12; this
+broker follows them: R1 a limit that is through the market on arrival is a taker fill at the market;
+R2 a resting limit fills at its own price; R4/R5 stop before target, a scheduled exit beyond the stop
+is a stop and beyond the target fills the target; R6 max_hold counts the fill bar as bar 1; R10 the
+cost-only funding charge for a stop/target exit inside a bar that ends on a settlement; R12 lot step
+and minimum size (enforced by sizing + Shield). R7 (which signals are acted on) lives in engine.py.
 """
 from __future__ import annotations
 
@@ -46,6 +53,7 @@ class Book:
     orders: dict = field(default_factory=dict)        # symbol -> Order
     positions: dict = field(default_factory=dict)     # symbol -> Position
     last_decision: dict = field(default_factory=dict)  # symbol -> bar open ms of the last processed signal bar
+    last_exit: dict = field(default_factory=dict)      # symbol -> {"ts", "reason", "scheduled"} of the last close
     trade_seq: int = 0
     n_trades: int = 0
     n_wins: int = 0
@@ -84,6 +92,7 @@ class PaperBroker(Exchange):
         self.path = Path(cfg.state_dir) / "books.json"
         self.books: dict[str, Book] = {}
         self.quotes: dict[str, tuple] = {}            # symbol -> (bid, ask, ts)
+        self.funding_outlook: dict[str, tuple] = {}   # symbol -> (estimated rate, next funding ms), from markPrice
         self.startup_events: list[dict] = []
         self._busy: set = set()
         self._load()
@@ -220,9 +229,9 @@ class PaperBroker(Exchange):
         else:
             limit = intent.entry
             crosses = q is not None and (q[1] <= limit if intent.side > 0 else q[0] >= limit)
-            if crosses:      # a limit that is already marketable takes liquidity, never worse than its limit
-                price = min(limit, q[1] * (1 + slip)) if intent.side > 0 else max(limit, q[0] * (1 - slip))
-                events.append(self._open(book, intent, price, ts, "market"))
+            if crosses:      # R1: a limit that is through the market on arrival is a taker fill at the market
+                price = q[1] * (1 + slip) if intent.side > 0 else q[0] * (1 - slip)
+                events.append(self._open(book, intent, price, ts, "limit_marketable"))
             else:
                 o = Order(id=intent.id, setup=book.id, symbol=sym, side=intent.side, qty=intent.qty, limit=limit,
                           stop=intent.stop, target=intent.target, max_hold=intent.max_hold, tf=intent.tf,
@@ -299,11 +308,11 @@ class PaperBroker(Exchange):
             if p.side > 0 and low <= p.stop:
                 px = min(p.stop, q[0]) if q else p.stop
                 p.flags.append("stop_seen_on_kline")
-                events.append(self._close(book, p, px * (1 - mult), ts, "stop", "taker"))
+                events.append(self._close(book, p, px * (1 - mult), ts, "stop", "taker", ref=px, intrabar=True))
             elif p.side < 0 and high >= p.stop:
                 px = max(p.stop, q[1]) if q else p.stop
                 p.flags.append("stop_seen_on_kline")
-                events.append(self._close(book, p, px * (1 + mult), ts, "stop", "taker"))
+                events.append(self._close(book, p, px * (1 + mult), ts, "stop", "taker", ref=px, intrabar=True))
         if events:
             self._save()
         return events
@@ -351,6 +360,30 @@ class PaperBroker(Exchange):
         self._save()
         return events
 
+    def set_funding_outlook(self, symbol: str, rate: float, next_ms: int | None) -> None:
+        self.funding_outlook[symbol] = (rate, next_ms)
+
+    def _partial_bar_funding(self, book: Book, p: Position, ref: float, ts: int) -> None:
+        """Backtester rule R10: a position stopped out or taken out at its target inside a bar that ends
+        with a funding settlement is charged that funding if it is a COST, never credited. Live, the
+        settlement has not happened yet when the position closes, so the current estimate from the
+        markPrice stream is used and the trade is flagged."""
+        out = self.funding_outlook.get(p.symbol)
+        if not out or out[1] is None or out[0] is None:
+            return
+        rate, next_ms = out
+        tf_ms = TF_MS[p.tf]
+        if not (ts < next_ms <= floor_ms(ts, tf_ms) + tf_ms):
+            return
+        amount = -p.side * p.qty * ref * rate
+        if amount >= 0:
+            return
+        p.funding += amount
+        p.last_funding_ts = next_ms
+        p.flags.append("funding_partial_bar_est")
+        book.cash += amount
+        book.sum_funding += amount
+
     # ------------------------------------------------------------------ internals
     def _fee(self, notional: float, liquidity: str) -> float:
         return abs(notional) * (self.cfg.maker_fee if liquidity == "maker" else self.cfg.taker_fee)
@@ -384,30 +417,42 @@ class PaperBroker(Exchange):
                           f"({entry_type}, {liquidity} fee {fee:.4f}); stop {p.stop} attached"}
 
     def _check_exit(self, book: Book, p: Position, bid: float, ask: float, ts: int) -> dict | None:
+        """Tick-driven exits. Order: stop, resting target, then anything at market (flatten, time)."""
         slip = self.cfg.slip(p.symbol)
         mult = self.cfg.stop_slippage_mult
+        tf_ms = TF_MS[p.tf]
+        # an exit that was already scheduled for this instant (R5): a target reached now is not "intrabar"
+        due = bool(p.flatten_reason) or (p.time_exit_ts is not None and ts >= p.time_exit_ts)
         if p.side > 0:
             if bid <= p.stop:
-                return self._close(book, p, min(p.stop, bid) * (1 - mult * slip), ts, "stop", "taker")
-            if p.flatten_reason:
-                return self._close(book, p, bid * (1 - slip), ts, p.flatten_reason, "taker")
+                ref = min(p.stop, bid)
+                return self._close(book, p, ref * (1 - mult * slip), ts, "stop", "taker", ref=ref,
+                                   intrabar=ts % tf_ms != 0)
             if p.target is not None and bid >= p.target:
-                return self._close(book, p, p.target, ts, "target", "maker")
+                return self._close(book, p, p.target, ts, "target", "maker", ref=p.target, intrabar=not due,
+                                   scheduled=due)
+            if p.flatten_reason:
+                return self._close(book, p, bid * (1 - slip), ts, p.flatten_reason, "taker", ref=bid, scheduled=True)
             if p.time_exit_ts is not None and ts >= p.time_exit_ts:
-                return self._close(book, p, bid * (1 - slip), ts, "time", "taker")
+                return self._close(book, p, bid * (1 - slip), ts, "time", "taker", ref=bid)
         else:
             if ask >= p.stop:
-                return self._close(book, p, max(p.stop, ask) * (1 + mult * slip), ts, "stop", "taker")
-            if p.flatten_reason:
-                return self._close(book, p, ask * (1 + slip), ts, p.flatten_reason, "taker")
+                ref = max(p.stop, ask)
+                return self._close(book, p, ref * (1 + mult * slip), ts, "stop", "taker", ref=ref,
+                                   intrabar=ts % tf_ms != 0)
             if p.target is not None and ask <= p.target:
-                return self._close(book, p, p.target, ts, "target", "maker")
+                return self._close(book, p, p.target, ts, "target", "maker", ref=p.target, intrabar=not due,
+                                   scheduled=due)
+            if p.flatten_reason:
+                return self._close(book, p, ask * (1 + slip), ts, p.flatten_reason, "taker", ref=ask, scheduled=True)
             if p.time_exit_ts is not None and ts >= p.time_exit_ts:
-                return self._close(book, p, ask * (1 + slip), ts, "time", "taker")
+                return self._close(book, p, ask * (1 + slip), ts, "time", "taker", ref=ask)
         return None
 
     def _market_exit(self, book: Book, p: Position, reason: str, ts: int, max_quote_age_ms: int | None) -> list[dict]:
-        """Exit now if a usable quote exists, else leave the instruction on the position."""
+        """A scheduled exit (signal, time, halt) at the current quote, or left on the position when no
+        usable quote exists. R5: beyond the stop it is booked as a stop (2x slippage); beyond the
+        target the resting target fills at its price (maker)."""
         q = self.quotes.get(p.symbol)
         if q is None or (max_quote_age_ms is not None and ts - q[2] > max_quote_age_ms):
             p.flatten_reason = reason
@@ -417,14 +462,27 @@ class PaperBroker(Exchange):
         mult = self.cfg.stop_slippage_mult
         if p.side > 0:
             if bid <= p.stop:
-                return [self._close(book, p, min(p.stop, bid) * (1 - mult * slip), ts, "stop", "taker")]
-            return [self._close(book, p, bid * (1 - slip), ts, reason, "taker")]
+                ref = min(p.stop, bid)
+                return [self._close(book, p, ref * (1 - mult * slip), ts, "stop", "taker", ref=ref, scheduled=True)]
+            if p.target is not None and bid >= p.target:
+                return [self._close(book, p, p.target, ts, "target", "maker", ref=p.target, scheduled=True)]
+            return [self._close(book, p, bid * (1 - slip), ts, reason, "taker", ref=bid, scheduled=True)]
         if ask >= p.stop:
-            return [self._close(book, p, max(p.stop, ask) * (1 + mult * slip), ts, "stop", "taker")]
-        return [self._close(book, p, ask * (1 + slip), ts, reason, "taker")]
+            ref = max(p.stop, ask)
+            return [self._close(book, p, ref * (1 + mult * slip), ts, "stop", "taker", ref=ref, scheduled=True)]
+        if p.target is not None and ask <= p.target:
+            return [self._close(book, p, p.target, ts, "target", "maker", ref=p.target, scheduled=True)]
+        return [self._close(book, p, ask * (1 + slip), ts, reason, "taker", ref=ask, scheduled=True)]
 
-    def _close(self, book: Book, p: Position, price: float, ts: int, reason: str, liquidity: str) -> dict:
+    def _close(self, book: Book, p: Position, price: float, ts: int, reason: str, liquidity: str,
+               ref: float | None = None, intrabar: bool = False, scheduled: bool = False) -> dict:
+        """ref = exit price before slippage. intrabar = a stop/target hit inside a bar (not at its open
+        instant, not a scheduled exit): rule R10 then applies. scheduled = exit flag / max_hold / halt."""
         del book.positions[p.symbol]
+        if intrabar:
+            self._partial_bar_funding(book, p, ref if ref is not None else price, ts)
+        book.last_exit[p.symbol] = {"ts": ts, "reason": reason, "scheduled": bool(
+            scheduled or reason == "time" or (p.time_exit_ts is not None and ts >= p.time_exit_ts))}
         gross = p.side * p.qty * (price - p.entry_price)
         exit_fee = self._fee(p.qty * price, liquidity)
         fees = p.entry_fee + exit_fee

@@ -50,6 +50,8 @@ def test_replayed_archive_bars_give_the_same_decisions_as_the_full_frame(tmp_pat
         close_ms = t + HOUR_MS
         clock["now"] = close_ms - 150
         eng.on_book(SYM, row.close, round(row.close + 0.01, 2), close_ms - 200, clock["now"])   # a quote to trade on
+        eng.on_mark(SYM, row.close, 0.0001, close_ms - close_ms % (8 * HOUR_MS) + 8 * HOUR_MS, close_ms - 400,
+                    clock["now"])                                                               # the 1 s markPrice
         clock["now"] = close_ms + 300
         k = {"t": t, "T": close_ms - 1, "i": "1h", "o": repr(row.open), "h": repr(row.high), "l": repr(row.low),
              "c": repr(row.close), "v": repr(row.volume), "q": repr(row.quote_volume), "n": int(row.trades),

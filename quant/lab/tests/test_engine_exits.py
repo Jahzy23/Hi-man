@@ -191,3 +191,47 @@ def test_position_open_at_the_end_is_closed_at_last_close_with_costs():   # rule
     assert t.exit_ref == 102.0 and t.exit_price == approx(102 * (1 - SLIP))
     net = qty * (102 * (1 - SLIP) - 100 * (1 + SLIP)) - qty * (100 * (1 + SLIP) + 102 * (1 - SLIP)) * TAKER
     assert t.net == approx(net) and res.equity.iloc[-1] == approx(1000 + net)
+
+
+# ---------------------------------------------------------------- slow-timeframe signals on 1h execution bars
+def _four_hour_case(n_hours=24):
+    import numpy as np
+    import pandas as pd
+    from lab.engine import to_exec_frame
+    rows = [(100.0, 101.0, 99.0, 100.0)] * n_hours
+    df1 = bars(rows)                                                   # starts 2024-01-01 00:00, 1h
+    idx4 = pd.date_range("2024-01-01", periods=n_hours // 4, freq="4h", tz="UTC")
+    sig4 = pd.DataFrame({"side": 0, "entry": np.nan, "entry_valid": 1, "stop": np.nan, "target": np.nan,
+                         "max_hold": np.nan, "exit": False}, index=idx4)
+    return df1, sig4, to_exec_frame
+
+
+def test_four_hour_signal_is_placed_on_the_1h_bar_that_closes_with_it():
+    df1, sig4, to_exec_frame = _four_hour_case()
+    sig4.iloc[0, sig4.columns.get_indexer(["side", "stop", "max_hold"])] = [1, 90.0, 2]
+    sig4.iloc[3, sig4.columns.get_loc("exit")] = True
+    sig1, mult = to_exec_frame(sig4, df1)
+    assert mult == 4 and sig1.index.equals(df1.index)
+    assert sig1["side"].to_numpy().nonzero()[0].tolist() == [3]        # 4h bar 00:00-04:00 -> 1h bar 03:00
+    assert sig1["exit"].to_numpy().nonzero()[0].tolist() == [15]       # 4h bar 12:00-16:00 -> 1h bar 15:00
+    t = one(run(df1, sig1, hold_mult=mult))
+    assert t.entry_time == df1.index[4]                                # first open after the 4h close
+    assert t.exit_reason == "time" and t.exit_time == df1.index[12]    # 2 four-hour bars later
+    assert t.bars_held == 8
+
+
+def test_four_hour_limit_filled_mid_bar_still_exits_on_the_four_hour_boundary_and_validity_scales():
+    df1, sig4, to_exec_frame = _four_hour_case()
+    rows = [(100.0, 101.0, 99.5, 100.0)] * 24
+    rows[6] = (100.0, 100.5, 98.5, 100.0)                              # only bar 06:00 trades through 99
+    df1 = bars(rows)
+    sig4.iloc[0, sig4.columns.get_indexer(["side", "entry", "stop", "max_hold", "entry_valid"])] = [1, 99.0, 90.0, 2, 1]
+    sig1, mult = to_exec_frame(sig4, df1)
+    assert sig1["entry_valid"].iloc[3] == 4                            # one 4h bar = four 1h bars
+    t = one(run(df1, sig1, hold_mult=mult))
+    assert t.entry_time == df1.index[6] and t.entry_price == 99.0
+    # filled in the 4h bar 04:00-08:00 (bar 1); bar 2 is 08:00-12:00; exit at the 12:00 open
+    assert t.exit_reason == "time" and t.exit_time == df1.index[12] and t.bars_held == 6
+    rows[6], rows[8] = rows[0], (100.0, 100.5, 98.5, 100.0)            # trade-through only after the validity window
+    df1 = bars(rows)
+    assert len(run(df1, to_exec_frame(sig4, df1)[0], hold_mult=4).trades) == 0

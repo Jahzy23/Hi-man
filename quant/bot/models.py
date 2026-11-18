@@ -61,7 +61,7 @@ class Position:
     entry_price: float
     entry_ts: int
     entry_fee: float
-    entry_type: str            # "limit" (maker) | "market" (taker)
+    entry_type: str            # "limit" (maker) | "market" | "limit_marketable" (both taker)
     stop: float
     target: float | None
     time_exit_ts: int | None

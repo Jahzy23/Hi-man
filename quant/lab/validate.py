@@ -502,6 +502,68 @@ def lookahead_audit(module, symbol: str, params: dict | None = None, start=None,
 
 
 # --------------------------------------------------------------------------------------
+# random-entry baseline (same side, same holding period)
+# --------------------------------------------------------------------------------------
+def random_entry_null(result: BacktestResult, df: pd.DataFrame, start=None, end=None,
+                      cfg: ExecConfig | None = None, n: int = 200, seed: int = 0, atr_n: int = 24) -> dict:
+    """Is the setup better than entering at random with the same shape of trade?
+
+    Every real trade is moved by the same whole number of days (so the hour of day, the spacing
+    and the long/short sequence are kept) and re-run as: market entry at the next open, the stop
+    and target at the same distance in ATR as the real trade, and a time exit after as many bars
+    as the real trade lasted. ``n`` different shifts give the null distribution. Because the
+    null keeps the side of every trade, a long-only setup is compared with long-only random
+    entries: market drift is in both. Limit entries become market entries in the null (it pays
+    a little more in costs than the real setup did). p = share of shifts doing at least as well."""
+    cfg = cfg or result.cfg
+    t = result.trades
+    i0, i1 = window_bounds(df.index, start if start is not None else result.start, end if end is not None else result.end)
+    out = dict(n_trades=len(t), n_shifts=n, actual_net_return=result.net_return,
+               actual_avg_R=float(t["R"].mean()) if len(t) else float("nan"))
+    if len(t) < 5:
+        out.update(null_mean=float("nan"), null_p95=float("nan"), p_value=float("nan"), null_avg_R=float("nan"),
+                   p_value_R=float("nan"), null_trades=float("nan"))
+        return out
+    pc = df["close"].shift(1)
+    tr = pd.concat([df["high"] - df["low"], (df["high"] - pc).abs(), (df["low"] - pc).abs()], axis=1).max(axis=1)
+    atr = tr.rolling(atr_n).mean().to_numpy(float)
+    close = df["close"].to_numpy(float)
+    bpd = int(round(pd.Timedelta(days=1) / pd.Timedelta(np.median(np.diff(df.index.values[:200])))))
+    span = ((i1 - i0 + 1) // bpd) * bpd
+    srow = df.index.get_indexer(pd.DatetimeIndex(t["signal_time"]))
+    side = t["side"].to_numpy(int)
+    ok = np.isfinite(atr[srow]) & (atr[srow] > 0)
+    stop_d = np.abs(t["entry_ref"].to_numpy(float) - t["stop"].to_numpy(float)) / atr[srow]
+    tgt_d = np.abs(t["target"].to_numpy(float) - t["entry_ref"].to_numpy(float)) / atr[srow]
+    hold = np.maximum(t["bars_held"].to_numpy(int), 1)
+    rng = np.random.default_rng(seed)
+    shifts = rng.choice(np.arange(1, span // bpd), size=min(n, span // bpd - 1), replace=False) * bpd
+    nets, avgR, ntr = [], [], []
+    nrows = len(df)
+    for k in shifts:
+        new = i0 - 1 + (srow - (i0 - 1) + k) % span
+        good = ok & (new >= 0) & (new < nrows - 1) & np.isfinite(atr[new])
+        sig = pd.DataFrame({"side": 0, "entry": np.nan, "entry_valid": 1, "stop": np.nan, "target": np.nan,
+                            "max_hold": np.nan, "exit": False}, index=df.index)
+        r = new[good]
+        sig.iloc[r, 0] = side[good]
+        sig.iloc[r, 3] = close[r] - side[good] * stop_d[good] * atr[r]
+        sig.iloc[r, 4] = close[r] + side[good] * tgt_d[good] * atr[r]
+        sig.iloc[r, 5] = hold[good]
+        res = run_backtest(df, sig, result.symbol, df.index[i0], df.index[i1], cfg)
+        nets.append(res.net_return)
+        avgR.append(float(res.trades["R"].mean()) if len(res.trades) else 0.0)
+        ntr.append(len(res.trades))
+    nets, avgR = np.array(nets), np.array(avgR)
+    out.update(n_shifts=len(nets), null_mean=float(nets.mean()), null_median=float(np.median(nets)),
+               null_p95=float(np.percentile(nets, 95)), null_avg_R=float(avgR.mean()),
+               null_trades=float(np.mean(ntr)),
+               p_value=float((1 + np.sum(nets >= result.net_return)) / (len(nets) + 1)),
+               p_value_R=float((1 + np.sum(avgR >= out["actual_avg_R"])) / (len(avgR) + 1)))
+    return out
+
+
+# --------------------------------------------------------------------------------------
 # (g) multiple testing
 # --------------------------------------------------------------------------------------
 def expected_max_sharpe(n_trials: int, sharpe_std: float) -> float:
@@ -596,7 +658,7 @@ def validate_setup(module, symbol: str, n_tests: int = 1, cfg: ExecConfig | None
     rep["stress"] = stress(module, symbol, cfg=cfg, bank=bank)
     rep["neighbourhood_table"], rep["neighbourhood"] = param_neighbourhood(module, symbol, cfg=cfg, bank=bank)
     wf = walk_forward(module, symbol, cfg=cfg, bank=bank)
-    rep["walk_forward"], rep["walk_forward_folds"] = wf.metrics, wf.folds
+    rep["walk_forward"], rep["walk_forward_folds"], rep["walk_forward_result"] = wf.metrics, wf.folds, wf.result
     rep["monte_carlo"] = monte_carlo(base.trades, n_paths=mc_paths)
     rep["monte_carlo_shuffle"] = monte_carlo(base.trades, n_paths=mc_paths, method="shuffle")
     rep["multiple_testing"] = multiple_testing(n_tests, m["years"])

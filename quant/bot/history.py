@@ -162,6 +162,9 @@ def read_archive_funding(state_dir: Path, sym: str) -> pd.Series:
 
 
 class History:
+    """Frames per symbol. The archive part ("static": base + refresh files) is rebuilt only by reload();
+    live bars are appended incrementally, so the hourly cost does not grow with the bot's uptime."""
+
     def __init__(self, symbols, state_dir: Path, base_loader=None, funding_archive=None):
         self.symbols = list(symbols)
         self.state_dir = Path(state_dir)
@@ -170,9 +173,13 @@ class History:
         funding_archive = funding_archive or default_funding_archive
         self.base: dict[str, pd.DataFrame] = {}
         self.base_funding: dict[str, pd.Series] = {}
-        self._static: dict = {}
+        self._static: dict = {}        # sym -> (frame, unknown mask, funding coverage end)
+        self._static_ms: dict = {}     # sym -> (sorted ms array, set)
+        self._static4h: dict = {}      # sym -> (4h frame, 4h unknown, tail rows of static not in it)
         self._fund: dict = {}
         self._own_rows: dict[str, list] = {}
+        self._own: dict = {}           # sym -> (frame, unknown) of live bars the archive does not have yet
+        self._ms1h: dict = {}          # sym -> sorted ms of every 1h bar we have
         self._cache: dict = {}
         self.mismatches: dict[str, list] = {s: [] for s in self.symbols}
         for s in self.symbols:
@@ -215,71 +222,95 @@ class History:
             col = np.full(len(static), np.nan)
             col[in_base] = base[c].to_numpy()
             static[c] = col
+        static = static[COLUMNS]
         unknown = pd.DataFrame(False, index=static.index, columns=MAYBE_UNKNOWN)
         for c in FUNDING_COLS:
             unknown[c] = ~known_f
         for c in OI_COLS:
             unknown[c] = ~in_base
-        self._static[sym] = (static[COLUMNS], unknown, cov_end)
         self._fund[sym] = fund
         rows = self.store.read(sym)
-        # integrity: a bar we recorded live must equal the archive's version of it once that exists
-        st_ms = set(index_ms(static.index).tolist())
+        st_ms = index_ms(static.index)
+        st_set = set(st_ms.tolist())
+        # bars we recorded live that the archive now has too: the archive's prices win (and must agree),
+        # our funding observation fills the archive bar's unknown funding cells
         self.mismatches[sym] = []
         for r in rows:
-            if r["time_ms"] in st_ms:
-                a = static.loc[to_index([r["time_ms"]])[0]]
-                bad = [c for c in ("open", "high", "low", "close") if abs(a[c] - r[c]) > 1e-9 * max(1.0, abs(a[c]))]
-                if bad:
-                    self.mismatches[sym].append({"time": iso(r["time_ms"]), "columns": bad})
+            if r["time_ms"] not in st_set:
+                continue
+            t = to_index([r["time_ms"]])[0]
+            a = static.loc[t]
+            bad = [c for c in ("open", "high", "low", "close") if abs(a[c] - r[c]) > 1e-9 * max(1.0, abs(a[c]))]
+            if bad:
+                self.mismatches[sym].append({"time": iso(r["time_ms"]), "columns": bad})
+            for c in FUNDING_COLS:
+                v = r.get(c)
+                if unknown.at[t, c] and v is not None and v == v:
+                    static.at[t, c] = v
+                    unknown.at[t, c] = False
+        self._static[sym] = (static, unknown, cov_end)
+        self._static_ms[sym] = (st_ms, st_set)
+        self._static4h.pop(sym, None)
         self._own_rows[sym] = rows
+        self._own[sym] = self._own_frames(sym, [r for r in rows if r["time_ms"] not in st_set])
+        self._ms1h[sym] = np.union1d(st_ms, index_ms(self._own[sym][0].index))
         self._cache.pop(sym, None)
 
-    def _build(self, sym: str):
-        if sym in self._cache:
-            return self._cache[sym]
-        static, unknown, cov_end = self._static[sym]
-        st_ms = index_ms(static.index)
-        have = set(st_ms.tolist())
-        own_by_ms = {r["time_ms"]: r for r in self._own_rows[sym]}
-        # own observations of funding fill unknown cells of archive bars (same bar, live value)
-        static_f, unknown_f = static, unknown
-        fill = [ms for ms in own_by_ms if ms in have]
-        if fill:
-            static_f, unknown_f = static.copy(), unknown.copy()
-            for ms in fill:
-                t = to_index([ms])[0]
-                for c in FUNDING_COLS:
-                    v = own_by_ms[ms].get(c)
-                    if unknown_f.at[t, c] and v is not None and v == v:
-                        static_f.at[t, c] = v
-                        unknown_f.at[t, c] = False
-        new = [r for ms, r in sorted(own_by_ms.items()) if ms not in have]
-        if new:
-            idx = to_index([r["time_ms"] for r in new])
-            own = pd.DataFrame({c: [r.get(c, np.nan) for r in new] for c in KLINE_COLS + FUNDING_COLS}, index=idx)
-            own["trades"] = own["trades"].astype("int64")
+    def _own_frames(self, sym: str, rows: list):
+        """(frame, unknown) for live bars that are not in the archive part."""
+        cov_end, fund = self._static[sym][2], self._fund[sym]
+        n = len(rows)
+        ms = np.array([r["time_ms"] for r in rows], dtype="int64")
+        idx = to_index(ms)
+        data = {c: np.array([r.get(c, np.nan) for r in rows], dtype="float64") for c in KLINE_COLS + FUNDING_COLS}
+        if n:
             # where the funding ARCHIVE covers the bar it wins over what we saw live (same rule as load())
-            fund = self._fund[sym]
-            close_t = idx + pd.Timedelta(hours=1)
-            covered = np.asarray(close_t < cov_end)
+            covered = ms + HOUR_MS < int(cov_end.timestamp() * 1000)
             if covered.any():
+                close_t = idx + pd.Timedelta(hours=1)
                 paid = fund.reindex(close_t).fillna(0.0).to_numpy()
                 rate = fund.reindex(fund.index.union(close_t)).ffill().reindex(close_t).to_numpy()
-                own["funding_paid"] = np.where(covered, paid, own["funding_paid"].to_numpy())
-                own["funding_rate"] = np.where(covered, rate, own["funding_rate"].to_numpy())
-            for c in OI_COLS:
-                own[c] = np.nan
-            own = own[COLUMNS]
-            own_unknown = pd.DataFrame(True, index=idx, columns=MAYBE_UNKNOWN)
-            for c in FUNDING_COLS:
-                own_unknown[c] = own[c].isna().to_numpy()
-            df = pd.concat([static_f, own])
-            unk = pd.concat([unknown_f, own_unknown])
+                data["funding_paid"] = np.where(covered, paid, data["funding_paid"])
+                data["funding_rate"] = np.where(covered, rate, data["funding_rate"])
+        data["trades"] = data["trades"].astype("int64")
+        for c in OI_COLS:
+            data[c] = np.full(n, np.nan)
+        own = pd.DataFrame(data, index=idx, columns=COLUMNS)
+        unk = pd.DataFrame({c: (np.isnan(data[c]) if c in FUNDING_COLS else np.ones(n, dtype=bool))
+                            for c in MAYBE_UNKNOWN}, index=idx, columns=MAYBE_UNKNOWN)
+        return own, unk
+
+    def _get(self, sym: str, tf: str):
+        c = self._cache.setdefault(sym, {})
+        if tf in c:
+            return c[tf]
+        static, s_unk, _ = self._static[sym]
+        own, o_unk = self._own[sym]
+        ordered = not len(own) or not len(static) or own.index[0] > static.index[-1]
+        if tf == "1h":
+            if not len(own):
+                c[tf] = (static, s_unk)
+            else:
+                df, unk = pd.concat([static, own]), pd.concat([s_unk, o_unk])
+                if not ordered:              # a live bar older than the newest archive bar (archive has a hole)
+                    df, unk = df.sort_index(), unk.sort_index()
+                c[tf] = (df, unk)
+        elif tf == "4h":
+            if not ordered:
+                c[tf] = resample_4h(*self._get(sym, "1h"))
+            else:
+                if sym not in self._static4h:    # the archive part is resampled once, not every hour
+                    ms = self._static_ms[sym][0]
+                    cut = int(ms[-1]) - int(ms[-1]) % TF_MS["4h"] if len(ms) else 0
+                    n_head = int(np.searchsorted(ms, cut))
+                    head = resample_4h(static.iloc[:n_head], s_unk.iloc[:n_head])
+                    self._static4h[sym] = (head[0], head[1], static.iloc[n_head:], s_unk.iloc[n_head:])
+                h_df, h_unk, t_df, t_unk = self._static4h[sym]
+                tail = resample_4h(pd.concat([t_df, own]), pd.concat([t_unk, o_unk]))
+                c[tf] = (pd.concat([h_df, tail[0]]), pd.concat([h_unk, tail[1]])) if len(tail[0]) else (h_df, h_unk)
         else:
-            df, unk = static_f, unknown_f
-        self._cache[sym] = {"1h": (df, unk)}
-        return self._cache[sym]
+            raise ValueError(f"unsupported timeframe {tf!r}")
+        return c[tf]
 
     def frame(self, sym: str, tf: str = "1h") -> pd.DataFrame:
         return self._get(sym, tf)[0]
@@ -287,18 +318,10 @@ class History:
     def unknown(self, sym: str, tf: str = "1h") -> pd.DataFrame:
         return self._get(sym, tf)[1]
 
-    def _get(self, sym: str, tf: str):
-        c = self._build(sym)
-        if tf not in c:
-            if tf != "4h":
-                raise ValueError(f"unsupported timeframe {tf!r}")
-            c[tf] = resample_4h(*c["1h"])
-        return c[tf]
-
     # ------------------------------------------------------------------ live bars
     def last_bar_ms(self, sym: str) -> int | None:
-        df = self.frame(sym, "1h")
-        return int(index_ms(df.index[-1:])[0]) if len(df) else None
+        ms = self._ms1h[sym]
+        return int(ms[-1]) if len(ms) else None
 
     def add_live_bar(self, sym: str, bar: dict) -> bool:
         """Persist one closed 1h bar seen live. False if we already have a bar at or after it."""
@@ -314,14 +337,21 @@ class History:
             row[c] = float("nan") if v is None else float(v)
         self.store.append(sym, row)
         own.append(row)
+        if ms in self._static_ms[sym][1]:
+            self.reload(sym)                 # the archive already has this bar: only its funding can be news
+            return True
+        df1, unk1 = self._own_frames(sym, [row])
+        df0, unk0 = self._own[sym]
+        self._own[sym] = (pd.concat([df0, df1]), pd.concat([unk0, unk1])) if len(df0) else (df1, unk1)
+        cur = self._ms1h[sym]
+        self._ms1h[sym] = np.append(cur, ms) if not len(cur) or ms > cur[-1] else np.union1d(cur, [ms])
         self._cache.pop(sym, None)
         return True
 
     # ------------------------------------------------------------------ gaps and readiness
     def missing_bars(self, sym: str, upto_ms: int) -> list[int]:
         """Open times of 1h bars missing between the first bar after the base archive and upto_ms."""
-        df = self.frame(sym, "1h")
-        have = index_ms(df.index)
+        have = self._ms1h[sym]
         base = self.base[sym]
         start = int(index_ms(base.index[-1:])[0]) + HOUR_MS if len(base) else (int(have[0]) if len(have) else upto_ms)
         if upto_ms < start:
@@ -331,11 +361,10 @@ class History:
 
     def ready(self, sym: str, tf: str, warmup: int, expected_last_ms: int) -> tuple[bool, str]:
         """True when the last `warmup` bars of `tf` are contiguous and end at expected_last_ms."""
-        df = self.frame(sym, tf)
         step = TF_MS[tf]
-        if len(df) == 0:
+        ms = self._ms1h[sym] if tf == "1h" else index_ms(self.frame(sym, tf).index)
+        if len(ms) == 0:
             return False, "history gap: no bars at all"
-        ms = index_ms(df.index)
         if int(ms[-1]) != expected_last_ms:
             missing = self.missing_bars(sym, expected_last_ms + step - HOUR_MS)
             return False, (f"history gap: last {tf} bar is {iso(int(ms[-1]))}, expected {iso(expected_last_ms)}"
@@ -356,11 +385,13 @@ class History:
         counts = unk.sum()
         return {c: int(n) for c, n in counts.items() if n > 0}
 
+    def funding_coverage_end(self, sym: str) -> pd.Timestamp:
+        return self._static[sym][2]
+
     def summary(self, sym: str, now_ms: int) -> dict:
         last_closed = now_ms - now_ms % HOUR_MS - HOUR_MS
         missing = self.missing_bars(sym, last_closed)
-        df = self.frame(sym, "1h")
-        return {"bars": int(len(df)), "last_bar": iso(self.last_bar_ms(sym)),
+        return {"bars": int(len(self._ms1h[sym])), "last_bar": iso(self.last_bar_ms(sym)),
                 "base_last_bar": iso(int(index_ms(self.base[sym].index[-1:])[0])) if len(self.base[sym]) else None,
                 "own_bars": len(self._own_rows[sym]), "missing_bars": len(missing),
                 "first_missing": iso(missing[0]) if missing else None,

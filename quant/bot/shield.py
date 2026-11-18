@@ -63,7 +63,7 @@ class Shield:
         self.books = dict(raw.get("books", {}))
         self.flags = dict(raw.get("flags", {}))
         self.last_now = raw.get("last_now")
-        self.healthy_since = raw.get("healthy_since")
+        self.healthy_since = None       # "healthy for 5 minutes" is always proven afresh by this process
         t = self.last_now or now_ms()
         if self.halts and not self.halt_path.exists():
             # HALT was deleted while the bot was down: that is the human's "resume"
@@ -134,6 +134,8 @@ class Shield:
             return False
         h = {"scope": scope, "kind": kind, "reason": reason, "since": iso(t), "since_ms": t,
              "needs_human": NEEDS_HUMAN.get(kind, True)}
+        if kind == "stale_feed":
+            self.healthy_since = None
         self.halts.append(h)
         self.save()                      # the halt is on disk before anything else happens
         self.journal.decision("halt", f"HALT {kind} ({scope}): {reason}", setup=None if scope == ACCOUNT else scope,

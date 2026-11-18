@@ -333,3 +333,47 @@ def test_verdict_applies_every_kill_rule():
     assert "multiple-testing haircut" in v["warnings"][0]
     assert V.verdict({**good, "audit": dict(passed=False, warnings=[]),
                       "haircut": dict(haircut_sharpe=0.0, sharpe=0.7)})["tier"] == "killed"
+
+
+# ---------------------------------------------------------------- random-entry baseline
+def _trend_frame(n=3000, drift=0.0004, seed=9):
+    rng = np.random.default_rng(seed)
+    c = 100 * np.exp(np.cumsum(rng.normal(drift, 0.006, n)))
+    o = np.concatenate(([100.0], c[:-1]))
+    idx = pd.date_range("2023-01-01", periods=n, freq="1h", tz="UTC")
+    return pd.DataFrame({"open": o, "high": np.maximum(o, c) * 1.001, "low": np.minimum(o, c) * 0.999, "close": c,
+                         "funding_paid": 0.0}, index=idx)
+
+
+def test_random_entry_null_does_not_credit_a_long_only_setup_for_market_drift():
+    from lab.engine import run_backtest
+    df = _trend_frame()
+    a = R.atr(df, 24)
+    sig = R.blank(df)
+    on = (np.arange(len(df)) % 48 == 30) & a.notna().to_numpy()          # a long every two days, no skill at all
+    sig["side"] = on.astype(int)
+    sig["stop"] = np.where(on, df["close"] - 4 * a, np.nan)
+    sig["max_hold"] = 24
+    res = run_backtest(df, sig, "BTCUSDT", cfg=ExecConfig(slippage=0.0, maker_fee=0.0, taker_fee=0.0))
+    assert res.net_return > 0.02                                         # looks like an edge: it is only the drift
+    null = V.random_entry_null(res, df, n=100)
+    assert null["null_mean"] > 0.5 * res.net_return                      # random longs earn about the same
+    assert null["p_value"] > 0.10 and 0 < null["p_value"] <= 1
+    assert null["n_shifts"] == 100 and abs(null["null_trades"] - len(res.trades)) <= 0.1 * len(res.trades)
+
+
+def test_random_entry_null_recognises_real_timing_skill():
+    from lab.engine import run_backtest
+    df = _trend_frame(drift=0.0)
+    a = R.atr(df, 24)
+    fwd = df["close"].shift(-12) / df["close"] - 1                       # cheat on purpose: knows the next 12 bars
+    sig = R.blank(df)
+    on = (np.arange(len(df)) % 24 == 7) & a.notna().to_numpy() & fwd.notna().to_numpy()
+    side = np.where(on, np.sign(fwd.fillna(0)), 0).astype(int)
+    sig["side"] = side
+    sig["stop"] = df["close"] - side * 6 * a
+    sig["max_hold"] = 12
+    res = run_backtest(df, sig, "BTCUSDT")
+    null = V.random_entry_null(res, df, n=100)
+    assert res.net_return > null["null_p95"] and null["p_value"] < 0.02
+    assert null["actual_avg_R"] > null["null_avg_R"] + 0.2

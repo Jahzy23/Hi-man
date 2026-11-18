@@ -178,10 +178,14 @@ def check_signal_frame(df: pd.DataFrame, sig: pd.DataFrame) -> None:
 # --------------------------------------------------------------------------------------
 def run_backtest(df: pd.DataFrame, sig: pd.DataFrame, symbol: str, start=None, end=None,
                  cfg: ExecConfig | None = None, name: str = "", params: dict | None = None,
-                 ) -> BacktestResult:
+                 hold_mult: int = 1) -> BacktestResult:
     """Run one (setup, symbol) backtest. ``df``/``sig`` share an index; warm-up rows before
     ``start`` are only ever read as signal rows (the last one may trigger an order at the first
-    bar of the window)."""
+    bar of the window).
+
+    ``hold_mult`` > 1: the signals were decided on a timeframe ``hold_mult`` times slower than
+    ``df`` and re-indexed with ``to_exec_frame`` (e.g. a 4h setup executed on 1h bars). max_hold
+    is then counted in the slower bars: the exit falls on the open of the slow bar after bar n."""
     cfg = cfg or ExecConfig()
     check_signal_frame(df, sig)
     index = df.index
@@ -224,6 +228,9 @@ def run_backtest(df: pd.DataFrame, sig: pd.DataFrame, symbol: str, start=None, e
         stop_a, target_a = _shift(stop_a, np.nan), _shift(target_a, np.nan)
         hold_a, exit_a = _shift(hold_a, 0), _shift(exit_a, False)
 
+    hold_mult = int(hold_mult)
+    if hold_mult > 1:                           # position of each bar inside its slow-timeframe block
+        OFF = (((index - pd.Timestamp(0, tz=index.tz)) // bar) % hold_mult).tolist()
     SIDE, ENTRY, VALID = side_a.tolist(), entry_a.tolist(), valid_a.tolist()
     STOP, TARGET, HOLD, EXIT = stop_a.tolist(), target_a.tolist(), hold_a.tolist(), exit_a.tolist()
     sig_rows = np.flatnonzero(side_a != 0).tolist()
@@ -285,6 +292,8 @@ def run_backtest(df: pd.DataFrame, sig: pd.DataFrame, symbol: str, start=None, e
         cash -= fee
         pos, qty, entry_ref, entry_fill = sd, q, ref, fill
         stp, tgt, has_tgt, mh = s_stop, s_tgt, isfinite(s_tgt), s_mh
+        if hold_mult > 1 and s_mh:
+            mh = s_mh * hold_mult - OFF[j]          # R6 in slow bars: the fill's slow bar is bar 1
         bars_in, entry_bar, sig_bar = 0, j, s_row
         entry_fee, t_funding, entry_type, exit_due = fee, 0.0, etype, False
         return True
@@ -457,6 +466,53 @@ def run_backtest(df: pd.DataFrame, sig: pd.DataFrame, symbol: str, start=None, e
     tdf = pd.DataFrame(trades, columns=TRADE_COLS)
     return BacktestResult(symbol, tdf, equity, pd.Series(inpos[i0:i1 + 1], index=index[i0:i1 + 1], name="in_position"),
                           diag, cfg, index[i0], index[i1], bar, name, dict(params or {}))
+
+
+# --------------------------------------------------------------------------------------
+# slower-timeframe signals on a faster execution frame
+# --------------------------------------------------------------------------------------
+def to_exec_frame(sig: pd.DataFrame, df_exec: pd.DataFrame) -> tuple[pd.DataFrame, int]:
+    """Re-index signals decided on a slower timeframe onto the execution frame ``df_exec``.
+
+    The row of the slow bar opening at t is placed on the execution bar that CLOSES at the same
+    instant, so the order still goes out at the first open after the slow bar's close.
+    entry_valid is converted to execution bars; max_hold stays in slow bars (pass the returned
+    multiple to ``run_backtest(hold_mult=...)``). Returns (signals on df_exec.index, multiple)."""
+    exec_bar = bar_length(df_exec.index)
+    mult = int(round(bar_length(sig.index) / exec_bar))
+    if mult <= 1:
+        if not sig.index.equals(df_exec.index):
+            raise ValueError("signals are not on the execution index")
+        return sig, 1
+    pos = df_exec.index.get_indexer(sig.index + (mult - 1) * exec_bar)
+    ok = pos >= 0
+    n = len(df_exec)
+    out = {}
+    for col, default in (("side", 0.0), ("entry", np.nan), ("entry_valid", 1.0), ("stop", np.nan),
+                         ("target", np.nan), ("max_hold", np.nan)):
+        a = np.full(n, default, dtype=float)
+        if col in sig.columns:
+            a[pos[ok]] = pd.to_numeric(sig[col], errors="coerce").to_numpy(dtype=float, na_value=np.nan)[ok]
+        out[col] = a
+    out["entry_valid"] = np.nan_to_num(out["entry_valid"], nan=1.0) * mult
+    ex = np.zeros(n, dtype=bool)
+    if "exit" in sig.columns:
+        ex[pos[ok]] = sig["exit"].astype("boolean").fillna(False).to_numpy(dtype=bool)[ok]
+    out["exit"] = ex
+    return pd.DataFrame(out, index=df_exec.index), mult
+
+
+def module_signals_1h(module, symbol: str, params: dict | None = None, upto=None):
+    """(1h frame, signals on the 1h index, hold multiple) for any strategy module: the setup still
+    decides on its own timeframe, execution is simulated on 1h bars."""
+    df_tf, sig = module_signals(module, symbol, params, upto)
+    if getattr(module, "TIMEFRAME", "1h") == "1h":
+        return df_tf, sig, 1
+    df1 = get_frame(symbol, "1h")
+    if upto is not None:
+        df1 = df1.loc[:to_ts(upto, df1.index)]
+    sig1, mult = to_exec_frame(sig, df1)
+    return df1, sig1, mult
 
 
 # --------------------------------------------------------------------------------------
