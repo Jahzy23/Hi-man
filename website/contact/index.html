@@ -56,69 +56,69 @@
   </div>
 </section>
 <section class="section">
-  <div class="container contact-grid">
-    <div class="form-card reveal">
-      <h2 style="font-size:1.6rem">Tell us about your project</h2>
-      <p style="color:var(--muted)">We strive to be in constant communication with our customers until the job is done. Fill out the form and we'll get back to you promptly.</p>
-      <!--
-        FORM DELIVERY
-        Option A (recommended): set data-endpoint to a form service URL, e.g. https://formspree.io/f/XXXXXXXX
-        Option B: leave data-endpoint empty and the form opens the visitor's email app addressed to data-mailto.
-      -->
-      <form id="quote-form" data-endpoint="" data-mailto="Jonathan@OurFreshAir.com" novalidate>
-        <div class="form-grid">
-          <div><label for="f-name">Name <span class="req">*</span></label><input id="f-name" name="name" type="text" autocomplete="name" required></div>
-          <div><label for="f-email">Email <span class="req">*</span></label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
-          <div><label for="f-phone">Phone</label><input id="f-phone" name="phone" type="tel" autocomplete="tel"></div>
-          <div><label for="f-company">Company / Facility</label><input id="f-company" name="company" type="text" autocomplete="organization"></div>
-          <div class="full"><label for="f-address">Address (street, city, zip code)</label><input id="f-address" name="address" type="text" autocomplete="street-address"></div>
-          <div><label for="f-sqft">Square footage of building</label><input id="f-sqft" name="square_footage" type="text" inputmode="numeric" placeholder="e.g. 25,000"></div>
-          <div><label for="f-service">Service needed</label>
-            <select id="f-service" name="service">
-              <option value="">Select a service</option>
-              <option>Free inspection / not sure yet</option>
-              <option>AHU / RTU / FCU cleaning</option>
-              <option>Air duct cleaning</option>
-              <option>HVAC sanitization</option>
-              <option>Evaporator coil cleaning</option>
-              <option>Dampers, turning vanes &amp; grills</option>
-              <option>Emergency service</option>
-            </select>
+      <div class="container contact-grid">
+        <div class="form-card reveal">
+          <h2 style="font-size:1.6rem">Tell us about your project</h2>
+          <p style="color:var(--muted)">We strive to be in constant communication with our customers until the job is done. Fill out the form and we'll get back to you promptly.</p>
+          <!--
+            FORM DELIVERY
+            Option A (recommended): set data-endpoint to a form service URL, e.g. https://formspree.io/f/XXXXXXXX
+            Option B: leave data-endpoint empty and the form opens the visitor's email app addressed to data-mailto.
+          -->
+          <form id="quote-form" data-endpoint="" data-mailto="Jonathan@OurFreshAir.com" novalidate>
+            <div class="form-grid">
+              <div><label for="f-name">Name <span class="req">*</span></label><input id="f-name" name="name" type="text" autocomplete="name" required></div>
+              <div><label for="f-email">Email <span class="req">*</span></label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
+              <div><label for="f-phone">Phone</label><input id="f-phone" name="phone" type="tel" autocomplete="tel"></div>
+              <div><label for="f-company">Company / Facility</label><input id="f-company" name="company" type="text" autocomplete="organization"></div>
+              <div class="full"><label for="f-address">Address (street, city, zip code)</label><input id="f-address" name="address" type="text" autocomplete="street-address"></div>
+              <div><label for="f-sqft">Square footage of building</label><input id="f-sqft" name="square_footage" type="text" inputmode="numeric" placeholder="e.g. 25,000"></div>
+              <div><label for="f-service">Service needed</label>
+                <select id="f-service" name="service">
+                  <option value="">Select a service</option>
+                  <option>Free inspection / not sure yet</option>
+                  <option>AHU / RTU / FCU cleaning</option>
+                  <option>Air duct cleaning</option>
+                  <option>HVAC sanitization</option>
+                  <option>Evaporator coil cleaning</option>
+                  <option>Dampers, turning vanes &amp; grills</option>
+                  <option>Emergency service</option>
+                </select>
+              </div>
+              <div class="full"><label for="f-subject">Subject</label><input id="f-subject" name="subject" type="text"></div>
+              <div class="full"><label for="f-message">Message <span class="req">*</span></label><textarea id="f-message" name="message" required></textarea></div>
+              <div class="full" style="position:absolute;left:-9999px" aria-hidden="true"><label for="f-web">Website</label><input id="f-web" name="company_website" type="text" tabindex="-1" autocomplete="off"></div>
+              <div class="full"><button class="btn btn-primary btn-lg" type="submit">Send request</button></div>
+            </div>
+            <div id="form-status" class="form-status" role="status" aria-live="polite"></div>
+            <p class="form-note">By submitting you agree to be contacted about your request. We never share your information.</p>
+          </form>
+        </div>
+        <aside>
+          <div class="info-card reveal">
+            <h3>Contact information</h3>
+            <ul>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z"/></svg><div><strong>Phone</strong><a href="tel:+17863699016">786-369-9016</a></div></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg><div><strong>Email</strong><a href="mailto:Jonathan@OurFreshAir.com">Jonathan@OurFreshAir.com</a></div></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><div><strong>Location</strong>14351 SW 142 St, Unit B10<br>Miami, FL 33186</div></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><strong>Hours</strong>Open 24 hours, 7 days a week</div></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg><div><strong>License</strong>Florida #CAC1822263 &middot; NADCA Certified</div></li>
+            </ul>
           </div>
-          <div class="full"><label for="f-subject">Subject</label><input id="f-subject" name="subject" type="text"></div>
-          <div class="full"><label for="f-message">Message <span class="req">*</span></label><textarea id="f-message" name="message" required></textarea></div>
-          <div class="full" style="position:absolute;left:-9999px" aria-hidden="true"><label for="f-web">Website</label><input id="f-web" name="company_website" type="text" tabindex="-1" autocomplete="off"></div>
-          <div class="full"><button class="btn btn-primary btn-lg" type="submit">Send request</button></div>
-        </div>
-        <div id="form-status" class="form-status" role="status" aria-live="polite"></div>
-        <p class="form-note">By submitting you agree to be contacted about your request. We never share your information.</p>
-      </form>
-    </div>
-    <aside>
-      <div class="info-card reveal">
-        <h3>Contact information</h3>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z"/></svg><div><strong>Phone</strong><a href="tel:+17863699016">786-369-9016</a></div></li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg><div><strong>Email</strong><a href="mailto:Jonathan@OurFreshAir.com">Jonathan@OurFreshAir.com</a></div></li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><div><strong>Location</strong>14351 SW 142 St, Unit B10<br>Miami, FL 33186</div></li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><strong>Hours</strong>Open 24 hours, 7 days a week</div></li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg><div><strong>License</strong>Florida #CAC1822263 &middot; NADCA Certified</div></li>
-        </ul>
+          <div class="emergency reveal">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+            <div>
+              <h3>24 hour emergency service available</h3>
+              <p>If you have questions or special requests, just drop us a line. To get a free quote, or for emergency service, please contact us at your convenience. We look forward to serving you!</p>
+            </div>
+          </div>
+          <div class="map-embed reveal">
+            <iframe title="Map to Our Fresh Air, 14351 SW 142 St Unit B10, Miami FL 33186" src="https://www.google.com/maps?q=14351+SW+142+St+Unit+B10,+Miami,+FL+33186&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+          </div>
+        </aside>
       </div>
-      <div class="emergency reveal">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-        <div>
-          <h3>24 hour emergency service available</h3>
-          <p>If you have questions or special requests, just drop us a line. To get a free quote, or for emergency service, please contact us at your convenience. We look forward to serving you!</p>
-        </div>
-      </div>
-      <div class="map-embed reveal">
-        <iframe title="Map to Our Fresh Air, 14351 SW 142 St Unit B10, Miami FL 33186" src="https://www.google.com/maps?q=14351+SW+142+St+Unit+B10,+Miami,+FL+33186&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      </div>
-    </aside>
-  </div>
-</section>
-</main>
+    </section>
+    </main>
 <section class="cta-band">
   <div class="container">
     <div>
