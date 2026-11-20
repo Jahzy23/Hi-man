@@ -1,14 +1,14 @@
 {
  "source": "https://data.binance.vision/data/futures/um",
- "fetched_at_utc": "2026-11-20T07:01:05.085567+00:00",
+ "fetched_at_utc": "2026-11-20T12:20:06.140429+00:00",
  "checksum": "sha256 verified per file",
  "symbols": {
   "BTCUSDT": {
    "klines_1h": {
-    "rows": 37704,
+    "rows": 37728,
     "first": "2022-08-01 00:00:00+00:00",
-    "last": "2026-11-18 23:00:00+00:00",
-    "files": 69,
+    "last": "2026-11-19 23:00:00+00:00",
+    "files": 70,
     "missing_hours": 0
    },
    "funding": {
@@ -28,10 +28,10 @@
   },
   "ETHUSDT": {
    "klines_1h": {
-    "rows": 37704,
+    "rows": 37728,
     "first": "2022-08-01 00:00:00+00:00",
-    "last": "2026-11-18 23:00:00+00:00",
-    "files": 69,
+    "last": "2026-11-19 23:00:00+00:00",
+    "files": 70,
     "missing_hours": 0
    },
    "funding": {
@@ -51,10 +51,10 @@
   },
   "SOLUSDT": {
    "klines_1h": {
-    "rows": 37704,
+    "rows": 37728,
     "first": "2022-08-01 00:00:00+00:00",
-    "last": "2026-11-18 23:00:00+00:00",
-    "files": 69,
+    "last": "2026-11-19 23:00:00+00:00",
+    "files": 70,
     "missing_hours": 0
    },
    "funding": {
