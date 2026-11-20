@@ -1,30 +1,30 @@
 {
  "files": {
   "logs/decisions.jsonl": {
-   "bytes": 55708,
-   "lines": 145,
-   "sha256": "2dd298a7f233d312fbf3f0a3f2fbbdfc1f3db2cf9998d2749e5a32fca3616064"
+   "bytes": 63146,
+   "lines": 165,
+   "sha256": "c939e35d0b73d265f7f0cafad9e77ec3ac52a96f18f38e2ef00d8ced5ae61d2f"
   },
   "state/books.json": {
    "bytes": 1454,
    "sha256": "40a49f72045d30eebc4ca07e273215754038e29ccae7315566d4fb37afbcfbb5"
   },
   "state/market.json": {
-   "bytes": 720,
-   "sha256": "70e9db914494c2947c10d1a80ec05b4b419b49cb03c0869f601dbfdecc91de15"
+   "bytes": 768,
+   "sha256": "a9d96fef16dd63a7a8e48629bab0990d82274dfb5c17c7ed03ce92760366aaf9"
   },
   "state/shield.json": {
    "bytes": 659,
    "sha256": "124967b4c32e5129d1731b836eb1cbf09821cab1a3b509508e46d86eae3678c7"
   },
   "state/status.json": {
-   "bytes": 4783,
-   "sha256": "c94e0990bcc6077a362eb9c3b373858b3488e53c32e7289e0c7cde473b63ba71"
+   "bytes": 4830,
+   "sha256": "32ce116b9d986f6478080815f93dd5ce8850c5175d09b972f5aa91ce79c4eaa6"
   }
  },
  "format": 1,
  "restore": "python3 bot/snapshot.py --restore   (only into an empty bot/state and bot/logs)",
- "taken_at": "2026-11-20T16:09:06.280Z",
- "taken_at_ms": 1795190946280,
+ "taken_at": "2026-11-20T18:07:20.398Z",
+ "taken_at_ms": 1795198040398,
  "what": "minimal durable state of the paper bot (see bot/snapshot.py)"
 }
