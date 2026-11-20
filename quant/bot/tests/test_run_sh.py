@@ -43,7 +43,7 @@ def env_for(tmp_path, plan):
     fake.write_text(FAKE)
     e = dict(os.environ, BOT_STATE_DIR=str(tmp_path / "state"), BOT_LOG_DIR=str(tmp_path / "logs"),
              BOT_CMD=f"{sys.executable} {fake}", FAKE_PLAN=plan, BOT_BACKOFF_START="1", BOT_BACKOFF_MAX="2",
-             BOT_HALT_POLL="1")
+             BOT_HALT_POLL="1", BOT_SNAPSHOT_DIR=str(tmp_path / "snap"))
     return e
 
 
