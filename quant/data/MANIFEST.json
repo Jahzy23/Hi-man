@@ -1,14 +1,14 @@
 {
  "source": "https://data.binance.vision/data/futures/um",
- "fetched_at_utc": "2026-11-18T07:56:12.952067+00:00",
+ "fetched_at_utc": "2026-11-20T07:01:05.085567+00:00",
  "checksum": "sha256 verified per file",
  "symbols": {
   "BTCUSDT": {
    "klines_1h": {
-    "rows": 37680,
+    "rows": 37704,
     "first": "2022-08-01 00:00:00+00:00",
-    "last": "2026-11-17 23:00:00+00:00",
-    "files": 68,
+    "last": "2026-11-18 23:00:00+00:00",
+    "files": 69,
     "missing_hours": 0
    },
    "funding": {
@@ -18,20 +18,20 @@
     "files": 51
    },
    "open_interest_1h": {
-    "rows": 37681,
+    "rows": 37729,
     "first": "2022-08-01 00:00:00+00:00",
-    "last": "2026-11-18 00:00:00+00:00",
-    "daily_files_found": 1570,
-    "daily_files_expected": 1571,
+    "last": "2026-11-20 00:00:00+00:00",
+    "daily_files_found": 1572,
+    "daily_files_expected": 1573,
     "null_oi_hours": 9
    }
   },
   "ETHUSDT": {
    "klines_1h": {
-    "rows": 37680,
+    "rows": 37704,
     "first": "2022-08-01 00:00:00+00:00",
-    "last": "2026-11-17 23:00:00+00:00",
-    "files": 68,
+    "last": "2026-11-18 23:00:00+00:00",
+    "files": 69,
     "missing_hours": 0
    },
    "funding": {
@@ -41,20 +41,20 @@
     "files": 51
    },
    "open_interest_1h": {
-    "rows": 37681,
+    "rows": 37729,
     "first": "2022-08-01 00:00:00+00:00",
-    "last": "2026-11-18 00:00:00+00:00",
-    "daily_files_found": 1570,
-    "daily_files_expected": 1571,
+    "last": "2026-11-20 00:00:00+00:00",
+    "daily_files_found": 1572,
+    "daily_files_expected": 1573,
     "null_oi_hours": 9
    }
   },
   "SOLUSDT": {
    "klines_1h": {
-    "rows": 37680,
+    "rows": 37704,
     "first": "2022-08-01 00:00:00+00:00",
-    "last": "2026-11-17 23:00:00+00:00",
-    "files": 68,
+    "last": "2026-11-18 23:00:00+00:00",
+    "files": 69,
     "missing_hours": 0
    },
    "funding": {
@@ -64,11 +64,11 @@
     "files": 51
    },
    "open_interest_1h": {
-    "rows": 37681,
+    "rows": 37729,
     "first": "2022-08-01 00:00:00+00:00",
-    "last": "2026-11-18 00:00:00+00:00",
-    "daily_files_found": 1570,
-    "daily_files_expected": 1571,
+    "last": "2026-11-20 00:00:00+00:00",
+    "daily_files_found": 1572,
+    "daily_files_expected": 1573,
     "null_oi_hours": 9
    }
   }

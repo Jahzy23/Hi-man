@@ -118,7 +118,7 @@ def test_report_for_the_morning_brief(tmp_path):
 
 def test_scripts_run_from_the_command_line(tmp_path):
     bot = session(tmp_path)
-    for script, extra in (("status.py", ["--all", "-n", "5"]), ("report.py", ["--hours", "24"])):
+    for script, extra in (("status.py", ["--all", "-n", "5"]), ("report.py", ["--hours", "1000000"])):
         r = subprocess.run([sys.executable, str(ROOT / "bot" / script), "--state-dir", str(bot.cfg.state_dir),
                             "--log-dir", str(bot.cfg.log_dir), *extra], capture_output=True, text=True, timeout=60)
         assert r.returncode == 0, r.stderr

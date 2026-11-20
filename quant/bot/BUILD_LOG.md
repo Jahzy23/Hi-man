@@ -330,7 +330,14 @@ Known and accepted (not fixed):
 
 ## 6. Ship
 
-SMOKE_SECTION
+Live start, 2026-11-20 07:04 UTC (done by the lead after Forge was paused before its smoke run):
+`bot/run.sh start --fresh` with the three Lab-ranked setups. After 100 s: bot RUNNING, three feed
+connections up with 0 errors, ticks under 4 s old for all three symbols, heartbeat written, snapshot
+written to `paper_state/`, Shield ok. All three symbols are WARMING: 31 hourly bars
+(2026-11-19 00:00 .. 2026-11-20 06:00 UTC) are missing because the archive's daily file for
+2026-11-19 was not yet published. `runner_up_2` (oi_confirmed_breakout) is flagged as reading `oi`,
+which is not available live. Test suite at this point: 269 passed (one clock-dependent test fixed).
+
 
 ### How to run
 

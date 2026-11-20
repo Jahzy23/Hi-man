@@ -1,0 +1,244 @@
+{
+ "books": {
+  "leader": {
+   "active": true,
+   "day_pnl": 0.0,
+   "equity": 1000.0,
+   "fees": 0.0,
+   "funding": 0.0,
+   "losses": 0,
+   "mark_equity": 1000.0,
+   "orders": [],
+   "positions": [],
+   "role": "leader",
+   "start_equity": 1000.0,
+   "strategy": "tsmom",
+   "total_pnl": 0.0,
+   "trades": 0,
+   "unrealized": 0.0,
+   "wins": 0
+  },
+  "runner_up_1": {
+   "active": true,
+   "day_pnl": 0.0,
+   "equity": 1000.0,
+   "fees": 0.0,
+   "funding": 0.0,
+   "losses": 0,
+   "mark_equity": 1000.0,
+   "orders": [],
+   "positions": [],
+   "role": "runner_up",
+   "start_equity": 1000.0,
+   "strategy": "week_range_breakout_volume",
+   "total_pnl": 0.0,
+   "trades": 0,
+   "unrealized": 0.0,
+   "wins": 0
+  },
+  "runner_up_2": {
+   "active": true,
+   "day_pnl": 0.0,
+   "equity": 1000.0,
+   "fees": 0.0,
+   "funding": 0.0,
+   "losses": 0,
+   "mark_equity": 1000.0,
+   "orders": [],
+   "positions": [],
+   "role": "runner_up",
+   "start_equity": 1000.0,
+   "strategy": "oi_confirmed_breakout",
+   "total_pnl": 0.0,
+   "trades": 0,
+   "unrealized": 0.0,
+   "wins": 0
+  }
+ },
+ "config": "/home/user/Hi-man/quant/config/setup.toml",
+ "counters": {
+  "bars": 0,
+  "decisions": 0,
+  "klines": 0,
+  "marks": 0,
+  "ticks": 0
+ },
+ "feed": {
+  "market": {
+   "bad_messages": 0,
+   "connected": true,
+   "connects": 1,
+   "errors": 0,
+   "last_error": "",
+   "messages": 3
+  },
+  "market-b": {
+   "bad_messages": 0,
+   "connected": true,
+   "connects": 1,
+   "errors": 0,
+   "last_error": "",
+   "messages": 3
+  },
+  "public": {
+   "bad_messages": 0,
+   "connected": true,
+   "connects": 1,
+   "errors": 0,
+   "last_error": "",
+   "messages": 222
+  },
+  "queue": 11
+ },
+ "filters_verified": false,
+ "funding": {
+  "BTCUSDT": {
+   "last_mark": null,
+   "last_r": null,
+   "last_r_e_ms": null,
+   "next_ms": null,
+   "settled_ms": 0,
+   "settled_observed": false,
+   "settled_rate": null,
+   "watch_from_ms": null
+  },
+  "ETHUSDT": {
+   "last_mark": null,
+   "last_r": null,
+   "last_r_e_ms": null,
+   "next_ms": null,
+   "settled_ms": 0,
+   "settled_observed": false,
+   "settled_rate": null,
+   "watch_from_ms": null
+  },
+  "SOLUSDT": {
+   "last_mark": null,
+   "last_r": null,
+   "last_r_e_ms": null,
+   "next_ms": null,
+   "settled_ms": 0,
+   "settled_observed": false,
+   "settled_rate": null,
+   "watch_from_ms": null
+  }
+ },
+ "history": {
+  "BTCUSDT": {
+   "archive_mismatches": 0,
+   "bars": 37704,
+   "base_last_bar": "2026-11-18T23:00:00.000Z",
+   "first_missing": "2026-11-19T00:00:00.000Z",
+   "last_bar": "2026-11-18T23:00:00.000Z",
+   "last_missing": "2026-11-20T06:00:00.000Z",
+   "missing_bars": 31,
+   "own_bars": 0
+  },
+  "ETHUSDT": {
+   "archive_mismatches": 0,
+   "bars": 37704,
+   "base_last_bar": "2026-11-18T23:00:00.000Z",
+   "first_missing": "2026-11-19T00:00:00.000Z",
+   "last_bar": "2026-11-18T23:00:00.000Z",
+   "last_missing": "2026-11-20T06:00:00.000Z",
+   "missing_bars": 31,
+   "own_bars": 0
+  },
+  "SOLUSDT": {
+   "archive_mismatches": 0,
+   "bars": 37704,
+   "base_last_bar": "2026-11-18T23:00:00.000Z",
+   "first_missing": "2026-11-19T00:00:00.000Z",
+   "last_bar": "2026-11-18T23:00:00.000Z",
+   "last_missing": "2026-11-20T06:00:00.000Z",
+   "missing_bars": 31,
+   "own_bars": 0
+  }
+ },
+ "mode": "paper",
+ "pid": 1084,
+ "running": true,
+ "shield": {
+  "books": {
+   "leader": {
+    "blocks_today": 0,
+    "blocks_total": 0,
+    "consecutive_losses": 0,
+    "day": "2026-11-20",
+    "last_block": null,
+    "sod_equity": 1000.0
+   },
+   "runner_up_1": {
+    "blocks_today": 0,
+    "blocks_total": 0,
+    "consecutive_losses": 0,
+    "day": "2026-11-20",
+    "last_block": null,
+    "sod_equity": 1000.0
+   },
+   "runner_up_2": {
+    "blocks_today": 0,
+    "blocks_total": 0,
+    "consecutive_losses": 0,
+    "day": "2026-11-20",
+    "last_block": null,
+    "sod_equity": 1000.0
+   }
+  },
+  "flags": {},
+  "halted": false,
+  "halts": [],
+  "healthy_since": null,
+  "needs_human": false
+ },
+ "started": "2026-11-20T07:04:10.470Z",
+ "strategies": {
+  "leader": {
+   "needs": {},
+   "strategy": "tsmom",
+   "tf": "4h",
+   "warmup": 400
+  },
+  "runner_up_1": {
+   "needs": {},
+   "strategy": "week_range_breakout_volume",
+   "tf": "4h",
+   "warmup": 130
+  },
+  "runner_up_2": {
+   "needs": {
+    "BTCUSDT": [
+     "oi"
+    ],
+    "ETHUSDT": [
+     "oi"
+    ]
+   },
+   "strategy": "oi_confirmed_breakout",
+   "tf": "4h",
+   "warmup": 80
+  }
+ },
+ "ticks": {
+  "BTCUSDT": {
+   "age_s": null,
+   "ask": 0.0,
+   "bid": 0.0,
+   "event_ms": 0
+  },
+  "ETHUSDT": {
+   "age_s": null,
+   "ask": 0.0,
+   "bid": 0.0,
+   "event_ms": 0
+  },
+  "SOLUSDT": {
+   "age_s": null,
+   "ask": 0.0,
+   "bid": 0.0,
+   "event_ms": 0
+  }
+ },
+ "ts": "2026-11-20T07:04:11.672Z",
+ "ts_ms": 1795158251672
+}

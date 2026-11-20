@@ -1,0 +1,35 @@
+{
+ "books": {
+  "leader": {
+   "blocks_today": 0,
+   "blocks_total": 0,
+   "consecutive_losses": 0,
+   "day": "2026-11-20",
+   "last_block": null,
+   "seen_trades": [],
+   "sod_equity": 1000.0
+  },
+  "runner_up_1": {
+   "blocks_today": 0,
+   "blocks_total": 0,
+   "consecutive_losses": 0,
+   "day": "2026-11-20",
+   "last_block": null,
+   "seen_trades": [],
+   "sod_equity": 1000.0
+  },
+  "runner_up_2": {
+   "blocks_today": 0,
+   "blocks_total": 0,
+   "consecutive_losses": 0,
+   "day": "2026-11-20",
+   "last_block": null,
+   "seen_trades": [],
+   "sod_equity": 1000.0
+  }
+ },
+ "flags": {},
+ "halts": [],
+ "healthy_since": null,
+ "last_now": 1795158250470
+}

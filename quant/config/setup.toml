@@ -44,12 +44,23 @@ snapshot_min = 5                     # at most every 5 minutes, plus after each 
 # `strategy` is a module name in strategies/ (SPEC interface).  `params`
 # overrides the module's DEFAULT_PARAMS key by key.  `symbols` is optional.
 #
-# PLACEHOLDER: _reference_breakout is Forge's test strategy, not a chosen setup.
-# Replace this block once Radar/Lab have picked the leader and runners-up.
+# Chosen by Lab on 2026-11-18 (lab/results/RANKING.md, top3.json). All DEFAULT_PARAMS.
+# None of these passes the owner's buy-and-hold gate; all are PAPER ONLY and statistically unproven.
 # ---------------------------------------------------------------------------
 [[setup]]
 id = "leader"
 role = "leader"
-strategy = "_reference_breakout"
-[setup.params]
-lookback = 24
+strategy = "tsmom"                          # rank 1: time-series momentum, 4h
+symbols = ["ETHUSDT", "SOLUSDT"]
+
+[[setup]]
+id = "runner_up_1"
+role = "runner_up"
+strategy = "week_range_breakout_volume"     # rank 2: weekly range breakout on volume, 4h
+symbols = ["ETHUSDT", "SOLUSDT"]
+
+[[setup]]
+id = "runner_up_2"
+role = "runner_up"
+strategy = "oi_confirmed_breakout"          # rank 3: needs open interest, which the live feed lacks.
+symbols = ["BTCUSDT", "ETHUSDT"]            # Expected to be REFUSED by the bot until OI is available.
