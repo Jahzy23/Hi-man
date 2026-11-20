@@ -29,6 +29,9 @@ cd "$ROOT" || exit 1
 log() { echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) supervisor: $*" >> "$SUP_LOG"; }
 
 alive() { [ -n "${1:-}" ] && kill -0 "$1" 2>/dev/null; }
+# A recorded pid can be reused by an unrelated process after a container restart:
+# only treat it as our supervisor if its command line names this script.
+sup_alive() { alive "${1:-}" && tr '\0' ' ' < "/proc/$1/cmdline" 2>/dev/null | grep -q "run.sh"; }
 
 halt_blocks() {   # prints the reason and returns 0 when state/HALT forbids a restart
   [ -f "$STATE/HALT" ] || return 1
@@ -88,7 +91,7 @@ supervise() {
 case "${1:-}" in
   supervise) supervise ;;
   start)
-    if alive "$(cat "$SUP_PID" 2>/dev/null)"; then echo "supervisor already running (pid $(cat "$SUP_PID"))"; exit 0; fi
+    if sup_alive "$(cat "$SUP_PID" 2>/dev/null)"; then echo "supervisor already running (pid $(cat "$SUP_PID"))"; exit 0; fi
     if [ ! -f "$STATE/books.json" ] && [ -f "$SNAP/MANIFEST.json" ]; then
       # bot/state was lost (container reclaimed?) but a snapshot exists: make the human choose
       case "${2:-}" in
@@ -107,14 +110,14 @@ case "${1:-}" in
     ;;
   stop)
     pid="$(cat "$SUP_PID" 2>/dev/null)"
-    if alive "$pid"; then
+    if sup_alive "$pid"; then
       kill -TERM "$pid"
       for _ in $(seq 1 40); do alive "$pid" || break; sleep 0.5; done
       alive "$pid" && { echo "supervisor $pid did not stop in 20 s"; exit 1; }
       echo "stopped"
     else
       bpid="$(cat "$STATE/bot.pid" 2>/dev/null)"
-      if alive "$bpid"; then kill -TERM "$bpid"; echo "no supervisor; sent SIGTERM to bot $bpid"; else echo "not running"; fi
+      if alive "$bpid" && tr '\0' ' ' < "/proc/$bpid/cmdline" 2>/dev/null | grep -q "bot"; then kill -TERM "$bpid"; echo "no supervisor; sent SIGTERM to bot $bpid"; else echo "not running"; fi
     fi
     ;;
   restart) "$0" stop; "$0" start ;;
