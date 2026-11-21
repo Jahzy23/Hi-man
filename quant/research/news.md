@@ -94,3 +94,20 @@ outflows hawkish Fed"; "FOMC meeting December 2026 dates CME FedWatch rate hike 
 reaction Fed rate hike December pricing"; "Binance futures announcement November 2026 USDT-M perpetual
 margin tiers funding rate change outage"; "FXStreet ahead of Fed Minutes bitcoin ETF outflows November 18
 2026 ethereum solana price forecast".
+
+## Radar nightly scan, run 2026-11-21 01:55 UTC
+
+Web search worked; article pages were not opened. Figures are as reported in search snippets and are unverified
+except where our own candles confirm the price.
+
+- **2026-11-09 week, ETF outflows.** Cointelegraph reported $1.28bn net outflows from US spot bitcoin ETFs that
+  week, the largest since late June, with BTC near $74,000. https://cointelegraph.com/news/bitcoin-etfs-13b-biggest-weekly-outflow-late-june
+- **2026-11-02 to 11-13, ETF outflows and liquidations.** Forklog reported about $2.35bn withdrawn over the two
+  weeks, liquidations near $2bn in one 24-hour period over 14-15 Nov (citing Decrypt), and BTC failing to hold
+  $65,000 on 17 Nov. https://forklog.com/en/?p=107026
+- **2026-11-15, four-month low.** Crypto.com's news page (updated 18 Nov) reported BTC near $62,000 on 15 Nov and
+  total crypto market cap about $2.26tn, tied to risk-off equities. Our candles confirm a BTC low of 61,956 in the
+  bar opening 2026-11-15 01:00 UTC. https://crypto.com/us/coins-ai/bitcoin/latest-news
+- **No dated coverage of 20 Nov was found.** Our live feed showed BTC falling from about 61,800 to about 58,500
+  during 20 Nov UTC (paper bot status lines, not archive data).
+- Excluded: Morningstar and Stocktwits articles on record November outflows appear to describe November 2025.
