@@ -1,30 +1,42 @@
 {
  "files": {
   "logs/decisions.jsonl": {
-   "bytes": 92015,
-   "lines": 240,
-   "sha256": "bd56b6736671600c73df2ccae02687c01560b7b39589733150c755def51a14d9"
+   "bytes": 100726,
+   "lines": 264,
+   "sha256": "70a96455eac02a0c78aebd66d5ff65931298f58d8241ba5593adf10996a39720"
+  },
+  "state/bars/BTCUSDT_1h.csv": {
+   "bytes": 276,
+   "sha256": "c08c113ee0ed6d12b3e20f9cdb6117902c2d069f5b625508a7524cbd64101813"
+  },
+  "state/bars/ETHUSDT_1h.csv": {
+   "bytes": 280,
+   "sha256": "04bc59fd0746245d7dde8ac799463a4254a795ccdcf397b7e5bcef0590db387d"
+  },
+  "state/bars/SOLUSDT_1h.csv": {
+   "bytes": 267,
+   "sha256": "1afc501afd685f4769e2a90082db52b939f90098c90b8e6c3894d927b046abbc"
   },
   "state/books.json": {
    "bytes": 1454,
    "sha256": "40a49f72045d30eebc4ca07e273215754038e29ccae7315566d4fb37afbcfbb5"
   },
   "state/market.json": {
-   "bytes": 769,
-   "sha256": "5168943cc72169f89a09258fe8881970e4317dda5e53681c2a88bdd6eee4043a"
+   "bytes": 768,
+   "sha256": "32bc0f05089336b94eed50740fe602ea92672c221d8b80a201120d1b802bd4d9"
   },
   "state/shield.json": {
    "bytes": 659,
    "sha256": "0506758d99f05a1b6603582e5f8d88bfafe8c4dbd748ee5654c6baa1a1e3acb3"
   },
   "state/status.json": {
-   "bytes": 4832,
-   "sha256": "ff70c14328945757dd05f6bb73a8c86c964743da5dbe8fd81f69b421c5998974"
+   "bytes": 4406,
+   "sha256": "8c6dca4f8b90c512d1363662ec1a09a8d148f263f9d5862a3d18e2578c274f03"
   }
  },
  "format": 1,
  "restore": "python3 bot/snapshot.py --restore   (only into an empty bot/state and bot/logs)",
- "taken_at": "2026-11-21T01:57:26.673Z",
- "taken_at_ms": 1795226246673,
+ "taken_at": "2026-11-21T02:06:41.494Z",
+ "taken_at_ms": 1795226801494,
  "what": "minimal durable state of the paper bot (see bot/snapshot.py)"
 }

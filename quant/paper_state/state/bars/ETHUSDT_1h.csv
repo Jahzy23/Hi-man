@@ -1,0 +1,2 @@
+time,time_ms,open,high,low,close,volume,quote_volume,trades,taker_buy_base,taker_buy_quote,funding_paid,funding_rate,recv_ms
+2026-11-21T01:00:00.000Z,1795222800000,1622.22,1628.44,1616.66,1625.04,124368.331,201751828.00114,184972.0,66260.368,107495084.6518,0.0,,1795226400887.0
