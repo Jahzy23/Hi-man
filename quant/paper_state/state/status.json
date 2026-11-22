@@ -70,7 +70,7 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 5
+   "messages": 1
   },
   "market-b": {
    "bad_messages": 0,
@@ -78,7 +78,7 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 2
+   "messages": 1
   },
   "public": {
    "bad_messages": 0,
@@ -86,37 +86,37 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 229
+   "messages": 84
   },
-  "queue": 15
+  "queue": 7
  },
  "filters_verified": false,
  "funding": {
   "BTCUSDT": {
-   "last_mark": 60721.2133913,
-   "last_r": 2.399e-05,
-   "last_r_e_ms": 1795356697001,
-   "next_ms": null,
+   "last_mark": 60988.1,
+   "last_r": -9.97e-06,
+   "last_r_e_ms": 1795363901000,
+   "next_ms": 1795392000000,
    "settled_ms": 1795363200000,
    "settled_observed": false,
    "settled_rate": null,
    "watch_from_ms": null
   },
   "ETHUSDT": {
-   "last_mark": 1706.06965891,
-   "last_r": -1.34e-06,
-   "last_r_e_ms": 1795356697001,
-   "next_ms": null,
+   "last_mark": 1719.4,
+   "last_r": 1.567e-05,
+   "last_r_e_ms": 1795363901000,
+   "next_ms": 1795392000000,
    "settled_ms": 1795363200000,
    "settled_observed": false,
    "settled_rate": null,
    "watch_from_ms": null
   },
   "SOLUSDT": {
-   "last_mark": 70.29630492,
-   "last_r": -2.07e-06,
-   "last_r_e_ms": 1795356697001,
-   "next_ms": null,
+   "last_mark": 70.38017223,
+   "last_r": 1.974e-05,
+   "last_r_e_ms": 1795363901000,
+   "next_ms": 1795392000000,
    "settled_ms": 1795363200000,
    "settled_observed": false,
    "settled_rate": null,
@@ -130,8 +130,8 @@
    "base_last_bar": "2026-11-20T23:00:00.000Z",
    "first_missing": "2026-11-22T00:00:00.000Z",
    "last_bar": "2026-11-22T01:00:00.000Z",
-   "last_missing": "2026-11-22T15:00:00.000Z",
-   "missing_bars": 15,
+   "last_missing": "2026-11-22T17:00:00.000Z",
+   "missing_bars": 17,
    "own_bars": 2
   },
   "ETHUSDT": {
@@ -140,8 +140,8 @@
    "base_last_bar": "2026-11-20T23:00:00.000Z",
    "first_missing": "2026-11-22T00:00:00.000Z",
    "last_bar": "2026-11-22T01:00:00.000Z",
-   "last_missing": "2026-11-22T15:00:00.000Z",
-   "missing_bars": 15,
+   "last_missing": "2026-11-22T17:00:00.000Z",
+   "missing_bars": 17,
    "own_bars": 2
   },
   "SOLUSDT": {
@@ -150,13 +150,13 @@
    "base_last_bar": "2026-11-20T23:00:00.000Z",
    "first_missing": "2026-11-22T00:00:00.000Z",
    "last_bar": "2026-11-22T01:00:00.000Z",
-   "last_missing": "2026-11-22T15:00:00.000Z",
-   "missing_bars": 15,
+   "last_missing": "2026-11-22T17:00:00.000Z",
+   "missing_bars": 17,
    "own_bars": 2
   }
  },
  "mode": "paper",
- "pid": 241,
+ "pid": 244,
  "running": true,
  "shield": {
   "books": {
@@ -191,7 +191,7 @@
   "healthy_since": null,
   "needs_human": false
  },
- "started": "2026-11-22T16:07:00.227Z",
+ "started": "2026-11-22T18:06:46.700Z",
  "strategies": {
   "leader": {
    "needs": {},
@@ -239,6 +239,6 @@
    "event_ms": 0
   }
  },
- "ts": "2026-11-22T16:07:01.534Z",
- "ts_ms": 1795363621534
+ "ts": "2026-11-22T18:06:47.832Z",
+ "ts_ms": 1795370807832
 }
