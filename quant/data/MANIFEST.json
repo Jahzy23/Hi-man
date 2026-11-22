@@ -1,6 +1,6 @@
 {
  "source": "https://data.binance.vision/data/futures/um",
- "fetched_at_utc": "2026-11-21T12:19:59.676623+00:00",
+ "fetched_at_utc": "2026-11-22T01:53:41.299008+00:00",
  "checksum": "sha256 verified per file",
  "symbols": {
   "BTCUSDT": {
@@ -22,7 +22,7 @@
     "first": "2022-08-01 00:00:00+00:00",
     "last": "2026-11-21 00:00:00+00:00",
     "daily_files_found": 1573,
-    "daily_files_expected": 1574,
+    "daily_files_expected": 1575,
     "null_oi_hours": 9
    }
   },
@@ -45,7 +45,7 @@
     "first": "2022-08-01 00:00:00+00:00",
     "last": "2026-11-21 00:00:00+00:00",
     "daily_files_found": 1573,
-    "daily_files_expected": 1574,
+    "daily_files_expected": 1575,
     "null_oi_hours": 9
    }
   },
@@ -68,7 +68,7 @@
     "first": "2022-08-01 00:00:00+00:00",
     "last": "2026-11-21 00:00:00+00:00",
     "daily_files_found": 1573,
-    "daily_files_expected": 1574,
+    "daily_files_expected": 1575,
     "null_oi_hours": 9
    }
   }

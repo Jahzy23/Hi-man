@@ -7,3 +7,4 @@
 
 Rule: volatile if 7-day realised vol >= 80th percentile of trailing year, else trending if daily ADX(14) >= 25, else ranging.
 ETH remains the odd one out: open interest rising into a falling price.
+| 2026-11-22 01:55 | 2026-11-21 00:00 | volatile, down (30d -29.9%, ADX 44.4, RV7 95th pct) | volatile, down (30d -34.4%, ADX 41.9, OI 7d +1.6%) | volatile, down (30d -35.6%, ADX 49.8, OI 7d -9.7%) | none; volatility higher |

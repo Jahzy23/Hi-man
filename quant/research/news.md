@@ -111,3 +111,12 @@ except where our own candles confirm the price.
 - **No dated coverage of 20 Nov was found.** Our live feed showed BTC falling from about 61,800 to about 58,500
   during 20 Nov UTC (paper bot status lines, not archive data).
 - Excluded: Morningstar and Stocktwits articles on record November outflows appear to describe November 2025.
+
+## Radar nightly scan, run 2026-11-22 01:55 UTC
+
+- **No dated coverage of 20 or 21 Nov was found** in a standard search. The newest dated item is Crypto.com's
+  bitcoin news page (updated 2026-11-18), already logged on 21 Nov. It adds that a venture capitalist doubted BTC
+  reaching $100,000 by end-2026, citing weak AI stocks (snippet only).
+  https://crypto.com/us/coins-ai/bitcoin/latest-news
+- Our own data: archive candles confirm BTC closed 20 Nov at 58,915; the live feed showed a dip to about 55,600
+  early on 21 Nov and a recovery to about 60,300 by 22 Nov 00:07 UTC (paper bot status lines).
