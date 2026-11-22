@@ -19,3 +19,19 @@ All open positions here are shorts; real funding could add or subtract a little.
 
 Reading: 5 trades in total, far too few to judge any edge. The momentum shorts caught part of the fall but at
 0.5% risk the gains are small. The breakout setup found no qualifying week. Nothing here changes the ranking.
+
+## Run 2026-11-22 03:50 UTC: window 2026-10-31 16:00 to 2026-11-20 23:00 UTC (about 20 days)
+
+Same rules and the same funding caveat: funding after 2026-10-31 16:00 is counted as zero. ESTIMATES.
+
+| setup | symbol | trades | net | open at end | price change, same window |
+|---|---|---|---|---|---|
+| tsmom (rank 1) | ETHUSDT | 2 | +1.81% | yes | -27.9% |
+| tsmom (rank 1) | SOLUSDT | 1 | +1.64% | yes | -28.2% |
+| week_range_breakout_volume (rank 2) | ETHUSDT | 0 | 0.00% | no | -27.9% |
+| week_range_breakout_volume (rank 2) | SOLUSDT | 0 | 0.00% | no | -28.2% |
+| oi_confirmed_breakout (rank 3) | BTCUSDT | 1 | +1.35% | no (closed) | -24.0% |
+| oi_confirmed_breakout (rank 3) | ETHUSDT | 1 | +0.65% | yes | -27.9% |
+
+Reading: still 5 trades in total; all profitable shorts so far, as expected for trend setups in a falling market.
+Too few to judge. No change to the ranking.
