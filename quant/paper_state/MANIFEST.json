@@ -1,42 +1,42 @@
 {
  "files": {
   "logs/decisions.jsonl": {
-   "bytes": 214037,
-   "lines": 567,
-   "sha256": "1ef12eb4a02e849bc2e92ffded2f2830bcc937d9c8d0bb3955044e593c3bb26b"
+   "bytes": 222733,
+   "lines": 591,
+   "sha256": "3164a4f3b6b741d58501c820440a42a0068711bc7084437d6ba234aba2ce6701"
   },
   "state/bars/BTCUSDT_1h.csv": {
-   "bytes": 276,
-   "sha256": "c08c113ee0ed6d12b3e20f9cdb6117902c2d069f5b625508a7524cbd64101813"
+   "bytes": 425,
+   "sha256": "23dcc44a03c718f8b9af66470b461f4393d1ca1d6e77dda21309ecdadc72b736"
   },
   "state/bars/ETHUSDT_1h.csv": {
-   "bytes": 280,
-   "sha256": "04bc59fd0746245d7dde8ac799463a4254a795ccdcf397b7e5bcef0590db387d"
+   "bytes": 431,
+   "sha256": "8e61c47b6d6f5f4cd848d6da71906ed6aab546bf4330adfbdf5cd6f17d9f8e60"
   },
   "state/bars/SOLUSDT_1h.csv": {
-   "bytes": 267,
-   "sha256": "1afc501afd685f4769e2a90082db52b939f90098c90b8e6c3894d927b046abbc"
+   "bytes": 405,
+   "sha256": "278a991b87c2a25be88582707463ecefff4657a823b83c1dff5de6604107ee67"
   },
   "state/books.json": {
    "bytes": 1454,
    "sha256": "40a49f72045d30eebc4ca07e273215754038e29ccae7315566d4fb37afbcfbb5"
   },
   "state/market.json": {
-   "bytes": 753,
-   "sha256": "45514f222805bb4d01772afdd14f8817c3f2ad32890bc5731a7fcfe68c00fb68"
+   "bytes": 763,
+   "sha256": "719ae953601e462c9a921240d79c663448b02b071e38bb583c83d0ec12018293"
   },
   "state/shield.json": {
    "bytes": 659,
    "sha256": "661f191fa1d9b42047a1c2c83e1d41a5ce190db16e4167f256cdc891a86d7de3"
   },
   "state/status.json": {
-   "bytes": 4813,
-   "sha256": "d0c92d3728f3bf5ec894bb5de403860abcf3ab9f7cb520e5574afb3663ec340a"
+   "bytes": 4826,
+   "sha256": "066f519e32defc4d484060956f4c2a82cc1cb83816f555775b4e75a8d08368a8"
   }
  },
  "format": 1,
  "restore": "python3 bot/snapshot.py --restore   (only into an empty bot/state and bot/logs)",
- "taken_at": "2026-11-22T01:56:26.983Z",
- "taken_at_ms": 1795312586983,
+ "taken_at": "2026-11-22T02:07:18.005Z",
+ "taken_at_ms": 1795313238005,
  "what": "minimal durable state of the paper bot (see bot/snapshot.py)"
 }
