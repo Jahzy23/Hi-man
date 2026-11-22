@@ -1,9 +1,9 @@
 {
  "files": {
   "logs/decisions.jsonl": {
-   "bytes": 230508,
-   "lines": 612,
-   "sha256": "2e3ecf7ed5a887c17e87b8fa929baaee39d57c814e5ec8edbf6370efd60e6f18"
+   "bytes": 238289,
+   "lines": 633,
+   "sha256": "1332ede9b20faf380be6bb533e3e1a50e5bdcddc03837244d13b11f9344dd645"
   },
   "state/bars/BTCUSDT_1h.csv": {
    "bytes": 425,
@@ -22,21 +22,21 @@
    "sha256": "40a49f72045d30eebc4ca07e273215754038e29ccae7315566d4fb37afbcfbb5"
   },
   "state/market.json": {
-   "bytes": 764,
-   "sha256": "453c7e877d3b68559ce61e7b305b44450dafaf9f62eb663abb31aad2a006731f"
+   "bytes": 741,
+   "sha256": "8de242bf7e2d237d988ae9f89f926c2f7f52d0a7a8c61eb1a0b76f7ee90f9e0e"
   },
   "state/shield.json": {
    "bytes": 659,
    "sha256": "661f191fa1d9b42047a1c2c83e1d41a5ce190db16e4167f256cdc891a86d7de3"
   },
   "state/status.json": {
-   "bytes": 4827,
-   "sha256": "a8c3655a0a263cf81369208872b424844dcce75123863d76e82409cb836075f0"
+   "bytes": 4804,
+   "sha256": "f79c26eaec90110a890eb3103b84a7eecc8fc7b23468ba65c90d81bd948014e8"
   }
  },
  "format": 1,
  "restore": "python3 bot/snapshot.py --restore   (only into an empty bot/state and bot/logs)",
- "taken_at": "2026-11-22T03:50:45.097Z",
- "taken_at_ms": 1795319445097,
+ "taken_at": "2026-11-22T04:06:36.228Z",
+ "taken_at_ms": 1795320396228,
  "what": "minimal durable state of the paper bot (see bot/snapshot.py)"
 }
