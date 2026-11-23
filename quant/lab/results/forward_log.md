@@ -35,3 +35,19 @@ Same rules and the same funding caveat: funding after 2026-10-31 16:00 is counte
 
 Reading: still 5 trades in total; all profitable shorts so far, as expected for trend setups in a falling market.
 Too few to judge. No change to the ranking.
+
+## Run 2026-11-23 03:50 UTC: window 2026-10-31 16:00 to the 4h bar opening 2026-11-21 20:00 UTC (about 21 days)
+
+Same rules; now scripted as `python3 -m lab.forward`. Funding after 2026-10-31 16:00 counted as zero (ESTIMATES).
+
+| setup | symbol | trades | net | price change, same window |
+|---|---|---|---|---|
+| tsmom (rank 1) | ETHUSDT | 2 | +1.63% | -25.2% |
+| tsmom (rank 1) | SOLUSDT | 1 | +1.55% | -26.6% |
+| week_range_breakout_volume (rank 2) | ETHUSDT | 0 | 0.00% | -25.2% |
+| week_range_breakout_volume (rank 2) | SOLUSDT | 1 | -0.51% | -26.6% |
+| oi_confirmed_breakout (rank 3) | BTCUSDT | 1 | +1.35% | -22.4% |
+| oi_confirmed_breakout (rank 3) | ETHUSDT | 1 | +0.37% | -25.2% |
+
+Reading: 6 trades in total. The 21 Nov rebound (about +9% off the lows) took back some of the open short gains
+(tsmom ETH +1.81% -> +1.63%). Rank 2 took its first forward trade, a small loss on SOL. Still far too few to judge.
