@@ -1,9 +1,9 @@
 {
  "funding": {
   "BTCUSDT": {
-   "last_mark": 61260.3,
-   "last_r": 3.942e-05,
-   "last_r_e_ms": 1795421557002,
+   "last_mark": 61377.15777361,
+   "last_r": 3.017e-05,
+   "last_r_e_ms": 1795428697001,
    "next_ms": 1795449600000,
    "settled_ms": 1795420800000,
    "settled_observed": false,
@@ -11,9 +11,9 @@
    "watch_from_ms": null
   },
   "ETHUSDT": {
-   "last_mark": 1717.4440155,
-   "last_r": -4.579e-05,
-   "last_r_e_ms": 1795421557002,
+   "last_mark": 1722.54939455,
+   "last_r": -6.72e-05,
+   "last_r_e_ms": 1795428697001,
    "next_ms": 1795449600000,
    "settled_ms": 1795420800000,
    "settled_observed": false,
@@ -21,9 +21,9 @@
    "watch_from_ms": null
   },
   "SOLUSDT": {
-   "last_mark": 72.03,
-   "last_r": -2.964e-05,
-   "last_r_e_ms": 1795421557002,
+   "last_mark": 72.32224921,
+   "last_r": -7.162e-05,
+   "last_r_e_ms": 1795428697001,
    "next_ms": 1795449600000,
    "settled_ms": 1795420800000,
    "settled_observed": false,

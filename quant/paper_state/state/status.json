@@ -70,7 +70,7 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 3
+   "messages": 2
   },
   "market-b": {
    "bad_messages": 0,
@@ -78,7 +78,7 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 3
+   "messages": 2
   },
   "public": {
    "bad_messages": 0,
@@ -86,16 +86,16 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 40
+   "messages": 138
   },
   "queue": 11
  },
  "filters_verified": false,
  "funding": {
   "BTCUSDT": {
-   "last_mark": 61260.3,
-   "last_r": 3.942e-05,
-   "last_r_e_ms": 1795421557002,
+   "last_mark": 61377.15777361,
+   "last_r": 3.017e-05,
+   "last_r_e_ms": 1795428697001,
    "next_ms": 1795449600000,
    "settled_ms": 1795420800000,
    "settled_observed": false,
@@ -103,9 +103,9 @@
    "watch_from_ms": null
   },
   "ETHUSDT": {
-   "last_mark": 1717.4440155,
-   "last_r": -4.579e-05,
-   "last_r_e_ms": 1795421557002,
+   "last_mark": 1722.54939455,
+   "last_r": -6.72e-05,
+   "last_r_e_ms": 1795428697001,
    "next_ms": 1795449600000,
    "settled_ms": 1795420800000,
    "settled_observed": false,
@@ -113,9 +113,9 @@
    "watch_from_ms": null
   },
   "SOLUSDT": {
-   "last_mark": 72.03,
-   "last_r": -2.964e-05,
-   "last_r_e_ms": 1795421557002,
+   "last_mark": 72.32224921,
+   "last_r": -7.162e-05,
+   "last_r_e_ms": 1795428697001,
    "next_ms": 1795449600000,
    "settled_ms": 1795420800000,
    "settled_observed": false,
@@ -130,8 +130,8 @@
    "base_last_bar": "2026-11-21T23:00:00.000Z",
    "first_missing": "2026-11-23T00:00:00.000Z",
    "last_bar": "2026-11-22T23:00:00.000Z",
-   "last_missing": "2026-11-23T09:00:00.000Z",
-   "missing_bars": 10,
+   "last_missing": "2026-11-23T11:00:00.000Z",
+   "missing_bars": 12,
    "own_bars": 2
   },
   "ETHUSDT": {
@@ -140,18 +140,18 @@
    "base_last_bar": "2026-11-21T23:00:00.000Z",
    "first_missing": "2026-11-23T00:00:00.000Z",
    "last_bar": "2026-11-22T23:00:00.000Z",
-   "last_missing": "2026-11-23T09:00:00.000Z",
-   "missing_bars": 10,
+   "last_missing": "2026-11-23T11:00:00.000Z",
+   "missing_bars": 12,
    "own_bars": 2
   },
   "SOLUSDT": {
    "archive_mismatches": 0,
-   "bars": 37777,
+   "bars": 37800,
    "base_last_bar": "2026-11-21T23:00:00.000Z",
-   "first_missing": "2026-11-22T00:00:00.000Z",
-   "last_bar": "2026-11-22T01:00:00.000Z",
-   "last_missing": "2026-11-23T09:00:00.000Z",
-   "missing_bars": 33,
+   "first_missing": "2026-11-23T00:00:00.000Z",
+   "last_bar": "2026-11-22T23:00:00.000Z",
+   "last_missing": "2026-11-23T11:00:00.000Z",
+   "missing_bars": 12,
    "own_bars": 2
   }
  },
@@ -191,7 +191,7 @@
   "healthy_since": null,
   "needs_human": false
  },
- "started": "2026-11-23T10:06:59.030Z",
+ "started": "2026-11-23T12:08:08.250Z",
  "strategies": {
   "leader": {
    "needs": {},
@@ -239,6 +239,6 @@
    "event_ms": 0
   }
  },
- "ts": "2026-11-23T10:07:00.203Z",
- "ts_ms": 1795428420203
+ "ts": "2026-11-23T12:08:09.456Z",
+ "ts_ms": 1795435689456
 }
