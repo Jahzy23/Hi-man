@@ -1,3 +1,15 @@
+# Crypto market news scan - 2026-11-23
+
+Scan run 2026-11-23 01:55 UTC by Radar. Our own candles end 2026-11-21 23:00 UTC (Binance USDT-M archive).
+
+- One web search ("bitcoin price November 22 2026"). It returned mostly live-chart pages with no dated content.
+- The only result with a 2026 date in its URL is https://www.fool.com/investing/2026/11/13/why-bitcoin-is-falling-today/
+  (2026-11-13). It was already covered by the 2026-11-18 scan. It was not opened; the host is outside the allowed network.
+- The search tool's own summary said BTC traded "around $63,000 to $64,000" on 18-21 Nov. Our candles show a low of
+  55,126.70 (bar opening 2026-11-21 06:00 UTC) and a last close near 60,200. The summary cites no checkable source and
+  conflicts with exchange data, so it is REJECTED and not used anywhere.
+- No new dated items. Nothing here feeds any setup.
+
 # Crypto market news scan - 2026-11-18
 
 Scan run 2026-11-18 (UTC) by Radar. Price data used for cross-checks ends 2026-11-18 00:00 UTC
