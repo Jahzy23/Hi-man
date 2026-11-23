@@ -78,7 +78,7 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 2
+   "messages": 1
   },
   "public": {
    "bad_messages": 0,
@@ -86,16 +86,16 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 138
+   "messages": 542
   },
-  "queue": 11
+  "queue": 18
  },
  "filters_verified": false,
  "funding": {
   "BTCUSDT": {
-   "last_mark": 61377.15777361,
-   "last_r": 3.017e-05,
-   "last_r_e_ms": 1795428697001,
+   "last_mark": 61380.57681884,
+   "last_r": 3.004e-05,
+   "last_r_e_ms": 1795435968000,
    "next_ms": 1795449600000,
    "settled_ms": 1795420800000,
    "settled_observed": false,
@@ -103,9 +103,9 @@
    "watch_from_ms": null
   },
   "ETHUSDT": {
-   "last_mark": 1722.54939455,
-   "last_r": -6.72e-05,
-   "last_r_e_ms": 1795428697001,
+   "last_mark": 1723.03082946,
+   "last_r": -6.283e-05,
+   "last_r_e_ms": 1795435968000,
    "next_ms": 1795449600000,
    "settled_ms": 1795420800000,
    "settled_observed": false,
@@ -113,9 +113,9 @@
    "watch_from_ms": null
   },
   "SOLUSDT": {
-   "last_mark": 72.32224921,
-   "last_r": -7.162e-05,
-   "last_r_e_ms": 1795428697001,
+   "last_mark": 72.48,
+   "last_r": -0.00010825,
+   "last_r_e_ms": 1795435968000,
    "next_ms": 1795449600000,
    "settled_ms": 1795420800000,
    "settled_observed": false,
@@ -156,7 +156,7 @@
   }
  },
  "mode": "paper",
- "pid": 241,
+ "pid": 254,
  "running": true,
  "shield": {
   "books": {
@@ -191,7 +191,7 @@
   "healthy_since": null,
   "needs_human": false
  },
- "started": "2026-11-23T12:08:08.250Z",
+ "started": "2026-11-23T12:21:16.840Z",
  "strategies": {
   "leader": {
    "needs": {},
@@ -239,6 +239,6 @@
    "event_ms": 0
   }
  },
- "ts": "2026-11-23T12:08:09.456Z",
- "ts_ms": 1795435689456
+ "ts": "2026-11-23T12:21:18.019Z",
+ "ts_ms": 1795436478019
 }
