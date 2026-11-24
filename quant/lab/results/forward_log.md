@@ -51,3 +51,18 @@ Same rules; now scripted as `python3 -m lab.forward`. Funding after 2026-10-31 1
 
 Reading: 6 trades in total. The 21 Nov rebound (about +9% off the lows) took back some of the open short gains
 (tsmom ETH +1.81% -> +1.63%). Rank 2 took its first forward trade, a small loss on SOL. Still far too few to judge.
+
+## Run 2026-11-24 03:50 UTC: window 2026-10-31 16:00 to the 4h bar opening 2026-11-22 20:00 UTC (about 22 days)
+
+`python3 -m lab.forward`. Funding after 2026-10-31 16:00 counted as zero (ESTIMATES).
+
+| setup | symbol | trades | net | price change, same window |
+|---|---|---|---|---|
+| tsmom (rank 1) | ETHUSDT | 2 | +1.52% | -23.5% |
+| tsmom (rank 1) | SOLUSDT | 1 | +1.53% | -26.2% |
+| week_range_breakout_volume (rank 2) | ETHUSDT | 0 | 0.00% | -23.5% |
+| week_range_breakout_volume (rank 2) | SOLUSDT | 1 | -0.51% | -26.2% |
+| oi_confirmed_breakout (rank 3) | BTCUSDT | 1 | +1.35% | -21.0% |
+| oi_confirmed_breakout (rank 3) | ETHUSDT | 1 | +0.37% | -23.5% |
+
+Reading: no new trades. The rebound took a little more from the open tsmom shorts. Still 6 trades in total, too few to judge.

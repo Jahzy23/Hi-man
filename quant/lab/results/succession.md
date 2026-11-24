@@ -5,3 +5,4 @@
 | 2026-11-21 | tsmom, 0 paper trades | week_range_breakout_volume, 0 | oi_confirmed_breakout, 0 (refused live: needs OI) | 0 |
 | 2026-11-22 | tsmom, 0 paper trades | week_range_breakout_volume, 0 | oi_confirmed_breakout, 0 | 0 |
 | 2026-11-23 | tsmom, 0 paper trades | week_range_breakout_volume, 0 | oi_confirmed_breakout, 0 | 0 |
+| 2026-11-24 | tsmom, 0 paper trades | week_range_breakout_volume, 0 | oi_confirmed_breakout, 0 | 0 |
