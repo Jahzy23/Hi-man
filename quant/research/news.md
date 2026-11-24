@@ -1,3 +1,18 @@
+# Crypto market news scan - 2026-11-24
+
+Scan run 2026-11-24 01:55 UTC by Radar. Our own candles end 2026-11-22 23:00 UTC.
+
+- One web search ("crypto market news November 23 2026 bitcoin"). No article dated 23 Nov 2026 was found.
+- Dated 2026 item: https://calebandbrown.com/blog/weekly-rollup-november-17-2026/ (2026-11-17). Not opened
+  (host not on the allowed network). The search tool's summary cited a total crypto market cap of $2.22T (-11.6% over 7 days).
+  That figure is UNVERIFIED and is not used.
+- The search summary also said BTC traded near $64K about 18-19 Nov. That matches our candles: BTCUSDT closed
+  63,036.8 on 18 Nov and 61,959.3 on 19 Nov, with a daily range of 62,220-64,851 on 18 Nov. It then fell to a
+  low of 55,126.70 on 21 Nov.
+- The summary also named a possible Fed rate hike, spot ETF outflows and "extreme fear" sentiment as drivers.
+  These are commentators' explanations, unverified and undated here. They are colour only.
+- Nothing here feeds any setup.
+
 # Crypto market news scan - 2026-11-23
 
 Scan run 2026-11-23 01:55 UTC by Radar. Our own candles end 2026-11-21 23:00 UTC (Binance USDT-M archive).
