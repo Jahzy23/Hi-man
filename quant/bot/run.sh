@@ -31,7 +31,9 @@ log() { echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) supervisor: $*" >> "$SUP_LOG"; }
 alive() { [ -n "${1:-}" ] && kill -0 "$1" 2>/dev/null; }
 # A recorded pid can be reused by an unrelated process after a container restart:
 # only treat it as our supervisor if its command line names this script.
-sup_alive() { alive "${1:-}" && tr '\0' ' ' < "/proc/$1/cmdline" 2>/dev/null | grep -q "run.sh"; }
+# Require an argv element that ends in run.sh immediately followed by the word "supervise":
+# a shell whose command TEXT merely mentions run.sh (e.g. `bash -c "... bot/run.sh start"`) does not count.
+sup_alive() { alive "${1:-}" && tr '\0' '\n' < "/proc/$1/cmdline" 2>/dev/null | grep -A1 -E '(^|/)run\.sh$' | grep -qx "supervise"; }
 
 halt_blocks() {   # prints the reason and returns 0 when state/HALT forbids a restart
   [ -f "$STATE/HALT" ] || return 1

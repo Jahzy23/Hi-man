@@ -172,3 +172,21 @@ def _alive(pid):
         return True
     except OSError:
         return False
+
+
+def test_start_ignores_reused_pid_whose_cmdline_merely_mentions_run_sh(tmp_path):
+    """After a container restart the recorded supervisor pid can belong to an unrelated shell whose
+    command line happens to contain the text 'run.sh' (e.g. the very `bash -c "... bot/run.sh start"`
+    that is calling us). That must not count as a live supervisor."""
+    e = env_for(tmp_path, "serve")
+    state = tmp_path / "state"
+    state.mkdir(parents=True, exist_ok=True)
+    decoy = subprocess.Popen(["bash", "-c", "sleep 30; true # bot/run.sh start"])
+    try:
+        (state / "supervisor.pid").write_text(str(decoy.pid))
+        out = subprocess.run([RUN, "start", "--fresh"], env=e, capture_output=True, text=True, timeout=30)
+        assert "already running" not in out.stdout, out.stdout
+        assert wait_for(lambda: "starting bot" in sup_log(tmp_path))
+    finally:
+        decoy.kill()
+        subprocess.run([RUN, "stop"], env=e, capture_output=True, text=True, timeout=30)
