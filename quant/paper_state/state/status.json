@@ -67,9 +67,9 @@
  "filters_verified": false,
  "funding": {
   "BTCUSDT": {
-   "last_mark": 60268.6,
-   "last_r": 4.446e-05,
-   "last_r_e_ms": 1795522361000,
+   "last_mark": 60237.4,
+   "last_r": 4.605e-05,
+   "last_r_e_ms": 1795523270001,
    "next_ms": 1795536000000,
    "settled_ms": 1795507200000,
    "settled_observed": false,
@@ -77,9 +77,9 @@
    "watch_from_ms": null
   },
   "ETHUSDT": {
-   "last_mark": 1697.92,
-   "last_r": 1.065e-05,
-   "last_r_e_ms": 1795522361000,
+   "last_mark": 1696.78,
+   "last_r": 3.98e-06,
+   "last_r_e_ms": 1795523270001,
    "next_ms": 1795536000000,
    "settled_ms": 1795507200000,
    "settled_observed": false,
@@ -87,9 +87,9 @@
    "watch_from_ms": null
   },
   "SOLUSDT": {
-   "last_mark": 70.60668559,
-   "last_r": 5.191e-05,
-   "last_r_e_ms": 1795522361000,
+   "last_mark": 70.51,
+   "last_r": 4.515e-05,
+   "last_r_e_ms": 1795523270001,
    "next_ms": 1795536000000,
    "settled_ms": 1795507200000,
    "settled_observed": false,
@@ -104,8 +104,8 @@
    "base_last_bar": "2026-11-22T23:00:00.000Z",
    "first_missing": "2026-11-24T00:00:00.000Z",
    "last_bar": "2026-11-23T23:00:00.000Z",
-   "last_missing": "2026-11-24T11:00:00.000Z",
-   "missing_bars": 12,
+   "last_missing": "2026-11-24T13:00:00.000Z",
+   "missing_bars": 14,
    "own_bars": 2
   },
   "ETHUSDT": {
@@ -114,8 +114,8 @@
    "base_last_bar": "2026-11-22T23:00:00.000Z",
    "first_missing": "2026-11-24T00:00:00.000Z",
    "last_bar": "2026-11-23T23:00:00.000Z",
-   "last_missing": "2026-11-24T11:00:00.000Z",
-   "missing_bars": 12,
+   "last_missing": "2026-11-24T13:00:00.000Z",
+   "missing_bars": 14,
    "own_bars": 2
   },
   "SOLUSDT": {
@@ -124,13 +124,13 @@
    "base_last_bar": "2026-11-22T23:00:00.000Z",
    "first_missing": "2026-11-24T00:00:00.000Z",
    "last_bar": "2026-11-23T23:00:00.000Z",
-   "last_missing": "2026-11-24T11:00:00.000Z",
-   "missing_bars": 12,
+   "last_missing": "2026-11-24T13:00:00.000Z",
+   "missing_bars": 14,
    "own_bars": 2
   }
  },
  "mode": "paper",
- "pid": 764,
+ "pid": 261,
  "running": true,
  "shield": {
   "books": {
@@ -165,7 +165,7 @@
   "healthy_since": null,
   "needs_human": false
  },
- "started": "2026-11-24T12:22:31.820Z",
+ "started": "2026-11-24T14:09:38.679Z",
  "strategies": {
   "leader": {
    "needs": {},
@@ -213,6 +213,6 @@
    "event_ms": 0
   }
  },
- "ts": "2026-11-24T12:22:31.820Z",
- "ts_ms": 1795522951820
+ "ts": "2026-11-24T14:09:38.679Z",
+ "ts_ms": 1795529378679
 }
