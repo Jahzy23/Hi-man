@@ -147,3 +147,11 @@ except where our own candles confirm the price.
   https://crypto.com/us/coins-ai/bitcoin/latest-news
 - Our own data: archive candles confirm BTC closed 20 Nov at 58,915; the live feed showed a dip to about 55,600
   early on 21 Nov and a recovery to about 60,300 by 22 Nov 00:07 UTC (paper bot status lines).
+
+## Radar nightly scan, run 2026-11-25 01:53 UTC
+
+- **No dated coverage of 23 or 24 Nov was found** in a standard search. The newest dated item returned was a
+  Fortune price page of 2026-10-30 (BTC about $77,381, snippet only), older than our own data.
+  https://fortune.com/article/price-of-bitcoin-10-30-2026/
+- Our own data: archive candles run to the bar opening 2026-11-23 23:00 UTC; the live feed (paper bot status
+  lines, not archive data) showed BTC about 59,600-60,400 through 24 Nov UTC, ETH about 1,673-1,699, SOL about 69-71.
