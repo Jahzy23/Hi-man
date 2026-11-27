@@ -59,9 +59,9 @@
  "counters": {
   "bars": 0,
   "decisions": 0,
-  "klines": 0,
-  "marks": 0,
-  "ticks": 0
+  "klines": 3066,
+  "marks": 1777,
+  "ticks": 5159
  },
  "feed": {
   "market": {
@@ -70,7 +70,7 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 2
+   "messages": 2423
   },
   "market-b": {
    "bad_messages": 0,
@@ -78,7 +78,7 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 2
+   "messages": 2421
   },
   "public": {
    "bad_messages": 0,
@@ -86,72 +86,72 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 64
+   "messages": 189052
   },
-  "queue": 9
+  "queue": 1
  },
  "filters_verified": false,
  "funding": {
   "BTCUSDT": {
-   "last_mark": 59144.77015217,
-   "last_r": 6.197e-05,
-   "last_r_e_ms": 1795572153000,
-   "next_ms": null,
+   "last_mark": 59641.31418116,
+   "last_r": 7.158e-05,
+   "last_r_e_ms": 1795817585000,
+   "next_ms": 1795824000000,
    "settled_ms": 1795593600000,
    "settled_observed": false,
    "settled_rate": null,
-   "watch_from_ms": null
+   "watch_from_ms": 1795817289001
   },
   "ETHUSDT": {
-   "last_mark": 1655.17,
-   "last_r": 6.849e-05,
-   "last_r_e_ms": 1795572153000,
-   "next_ms": null,
+   "last_mark": 1657.8093876,
+   "last_r": 6.593e-05,
+   "last_r_e_ms": 1795817584000,
+   "next_ms": 1795824000000,
    "settled_ms": 1795593600000,
    "settled_observed": false,
    "settled_rate": null,
-   "watch_from_ms": null
+   "watch_from_ms": 1795817289001
   },
   "SOLUSDT": {
-   "last_mark": 68.91566365,
-   "last_r": 0.0001,
-   "last_r_e_ms": 1795572153000,
-   "next_ms": null,
+   "last_mark": 71.58,
+   "last_r": 3.695e-05,
+   "last_r_e_ms": 1795817584000,
+   "next_ms": 1795824000000,
    "settled_ms": 1795593600000,
    "settled_observed": false,
    "settled_rate": null,
-   "watch_from_ms": null
+   "watch_from_ms": 1795817289001
   }
  },
  "history": {
   "BTCUSDT": {
    "archive_mismatches": 0,
-   "bars": 37825,
+   "bars": 37896,
    "base_last_bar": "2026-11-23T23:00:00.000Z",
-   "first_missing": "2026-11-24T00:00:00.000Z",
-   "last_bar": "2026-11-25T01:00:00.000Z",
+   "first_missing": "2026-11-27T00:00:00.000Z",
+   "last_bar": "2026-11-26T23:00:00.000Z",
    "last_missing": "2026-11-27T21:00:00.000Z",
-   "missing_bars": 93,
+   "missing_bars": 22,
    "own_bars": 3
   },
   "ETHUSDT": {
    "archive_mismatches": 0,
-   "bars": 37825,
+   "bars": 37896,
    "base_last_bar": "2026-11-23T23:00:00.000Z",
-   "first_missing": "2026-11-24T00:00:00.000Z",
-   "last_bar": "2026-11-25T01:00:00.000Z",
+   "first_missing": "2026-11-27T00:00:00.000Z",
+   "last_bar": "2026-11-26T23:00:00.000Z",
    "last_missing": "2026-11-27T21:00:00.000Z",
-   "missing_bars": 93,
+   "missing_bars": 22,
    "own_bars": 3
   },
   "SOLUSDT": {
    "archive_mismatches": 0,
-   "bars": 37825,
+   "bars": 37896,
    "base_last_bar": "2026-11-23T23:00:00.000Z",
-   "first_missing": "2026-11-24T00:00:00.000Z",
-   "last_bar": "2026-11-25T01:00:00.000Z",
+   "first_missing": "2026-11-27T00:00:00.000Z",
+   "last_bar": "2026-11-26T23:00:00.000Z",
    "last_missing": "2026-11-27T21:00:00.000Z",
-   "missing_bars": 93,
+   "missing_bars": 22,
    "own_bars": 3
   }
  },
@@ -221,24 +221,24 @@
  },
  "ticks": {
   "BTCUSDT": {
-   "age_s": null,
-   "ask": 0.0,
-   "bid": 0.0,
-   "event_ms": 0
+   "age_s": 0.14,
+   "ask": 59644.3,
+   "bid": 59644.2,
+   "event_ms": 1795817585014
   },
   "ETHUSDT": {
-   "age_s": null,
-   "ask": 0.0,
-   "bid": 0.0,
-   "event_ms": 0
+   "age_s": 0.33,
+   "ask": 1657.69,
+   "bid": 1657.68,
+   "event_ms": 1795817584820
   },
   "SOLUSDT": {
-   "age_s": null,
-   "ask": 0.0,
-   "bid": 0.0,
-   "event_ms": 0
+   "age_s": 0.21,
+   "ask": 71.54,
+   "bid": 71.53,
+   "event_ms": 1795817584936
   }
  },
- "ts": "2026-11-27T22:08:08.965Z",
- "ts_ms": 1795817288965
+ "ts": "2026-11-27T22:13:05.150Z",
+ "ts_ms": 1795817585150
 }

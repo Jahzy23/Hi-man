@@ -155,3 +155,11 @@ except where our own candles confirm the price.
   https://fortune.com/article/price-of-bitcoin-10-30-2026/
 - Our own data: archive candles run to the bar opening 2026-11-23 23:00 UTC; the live feed (paper bot status
   lines, not archive data) showed BTC about 59,600-60,400 through 24 Nov UTC, ETH about 1,673-1,699, SOL about 69-71.
+
+## Radar catch-up scan, run 2026-11-27 22:15 UTC (session was down 25 Nov 02:00 to 27 Nov 22:07 UTC; the 26 and 27 Nov runs were collapsed into this one)
+
+- One web search ("bitcoin price November 26 2026"). It returned no dated 2026 price for 25-27 Nov.
+- Latest dated 2026 item found: Fortune daily price page, BTC $64,146.40 at 06:30 on 2026-11-18. Source: https://fortune.com/article/price-of-bitcoin-11-18-2026/ (search snippet only, page not opened).
+- A Vietnamese headline "Bitcoin price today, November 26: reversal, sharp decrease" gives no year and no price, so it is not used. Source: https://news.laodong.vn/tien-te-dau-tu/gia-bitcoin-hom-nay-2611-dao-chieu-giam-manh-1616016.ldo
+- Other results were for November 2025 and are ignored.
+- Live feed at 2026-11-27 22:08 UTC (Binance websocket, bot snapshot): BTC 59,699.6 / ETH 1,658.81 / SOL 71.64.

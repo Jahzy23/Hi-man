@@ -6,3 +6,4 @@
 | 2026-11-22 | tsmom, 0 paper trades | week_range_breakout_volume, 0 | oi_confirmed_breakout, 0 | 0 |
 | 2026-11-23 | tsmom, 0 paper trades | week_range_breakout_volume, 0 | oi_confirmed_breakout, 0 | 0 |
 | 2026-11-24 | tsmom, 0 paper trades | week_range_breakout_volume, 0 | oi_confirmed_breakout, 0 | 0 |
+| 2026-11-25 to 2026-11-27 | tsmom, 0 paper trades (bot down most of the window) | week_range_breakout_volume, 0 | oi_confirmed_breakout, 0 | 0 |

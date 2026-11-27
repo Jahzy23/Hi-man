@@ -66,3 +66,18 @@ Reading: 6 trades in total. The 21 Nov rebound (about +9% off the lows) took bac
 | oi_confirmed_breakout (rank 3) | ETHUSDT | 1 | +0.37% | -23.5% |
 
 Reading: no new trades. The rebound took a little more from the open tsmom shorts. Still 6 trades in total, too few to judge.
+
+## Run 2026-11-27 22:20 UTC (catch-up; the 25-27 Nov runs were missed while the session was down): window 2026-10-31 16:00 to the 4h bar opening 2026-11-26 20:00 UTC (about 26 days)
+
+`python3 -m lab.forward`. Funding after 2026-10-31 16:00 counted as zero (ESTIMATES).
+
+| setup | symbol | trades | net | price change, same window |
+|---|---|---|---|---|
+| tsmom (rank 1) | ETHUSDT | 2 | +1.62% | -25.0% |
+| tsmom (rank 1) | SOLUSDT | 1 | +1.51% | -25.9% |
+| week_range_breakout_volume (rank 2) | ETHUSDT | 0 | 0.00% | -25.0% |
+| week_range_breakout_volume (rank 2) | SOLUSDT | 1 | -0.51% | -25.9% |
+| oi_confirmed_breakout (rank 3) | BTCUSDT | 1 | +1.35% | -21.9% |
+| oi_confirmed_breakout (rank 3) | ETHUSDT | 1 | +0.37% | -25.0% |
+
+Reading: no new trades in four days. Still 6 trades in total, too few to judge.
