@@ -70,7 +70,7 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 6
+   "messages": 2
   },
   "market-b": {
    "bad_messages": 0,
@@ -78,7 +78,7 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 6
+   "messages": 2
   },
   "public": {
    "bad_messages": 0,
@@ -86,38 +86,38 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 1800
+   "messages": 64
   },
-  "queue": 31
+  "queue": 9
  },
  "filters_verified": false,
  "funding": {
   "BTCUSDT": {
-   "last_mark": 59546.46065217,
-   "last_r": 7.159e-05,
-   "last_r_e_ms": 1795565503000,
-   "next_ms": 1795593600000,
-   "settled_ms": 1795564800000,
+   "last_mark": 59144.77015217,
+   "last_r": 6.197e-05,
+   "last_r_e_ms": 1795572153000,
+   "next_ms": null,
+   "settled_ms": 1795593600000,
    "settled_observed": false,
    "settled_rate": null,
    "watch_from_ms": null
   },
   "ETHUSDT": {
-   "last_mark": 1672.1821938,
-   "last_r": 9.143e-05,
-   "last_r_e_ms": 1795565503000,
-   "next_ms": 1795593600000,
-   "settled_ms": 1795564800000,
+   "last_mark": 1655.17,
+   "last_r": 6.849e-05,
+   "last_r_e_ms": 1795572153000,
+   "next_ms": null,
+   "settled_ms": 1795593600000,
    "settled_observed": false,
    "settled_rate": null,
    "watch_from_ms": null
   },
   "SOLUSDT": {
-   "last_mark": 69.4549317,
-   "last_r": 7.869e-05,
-   "last_r_e_ms": 1795565503000,
-   "next_ms": 1795593600000,
-   "settled_ms": 1795564800000,
+   "last_mark": 68.91566365,
+   "last_r": 0.0001,
+   "last_r_e_ms": 1795572153000,
+   "next_ms": null,
+   "settled_ms": 1795593600000,
    "settled_observed": false,
    "settled_rate": null,
    "watch_from_ms": null
@@ -126,37 +126,37 @@
  "history": {
   "BTCUSDT": {
    "archive_mismatches": 0,
-   "bars": 37824,
+   "bars": 37825,
    "base_last_bar": "2026-11-23T23:00:00.000Z",
    "first_missing": "2026-11-24T00:00:00.000Z",
-   "last_bar": "2026-11-23T23:00:00.000Z",
-   "last_missing": "2026-11-25T00:00:00.000Z",
-   "missing_bars": 25,
-   "own_bars": 2
+   "last_bar": "2026-11-25T01:00:00.000Z",
+   "last_missing": "2026-11-27T21:00:00.000Z",
+   "missing_bars": 93,
+   "own_bars": 3
   },
   "ETHUSDT": {
    "archive_mismatches": 0,
-   "bars": 37824,
+   "bars": 37825,
    "base_last_bar": "2026-11-23T23:00:00.000Z",
    "first_missing": "2026-11-24T00:00:00.000Z",
-   "last_bar": "2026-11-23T23:00:00.000Z",
-   "last_missing": "2026-11-25T00:00:00.000Z",
-   "missing_bars": 25,
-   "own_bars": 2
+   "last_bar": "2026-11-25T01:00:00.000Z",
+   "last_missing": "2026-11-27T21:00:00.000Z",
+   "missing_bars": 93,
+   "own_bars": 3
   },
   "SOLUSDT": {
    "archive_mismatches": 0,
-   "bars": 37824,
+   "bars": 37825,
    "base_last_bar": "2026-11-23T23:00:00.000Z",
    "first_missing": "2026-11-24T00:00:00.000Z",
-   "last_bar": "2026-11-23T23:00:00.000Z",
-   "last_missing": "2026-11-25T00:00:00.000Z",
-   "missing_bars": 25,
-   "own_bars": 2
+   "last_bar": "2026-11-25T01:00:00.000Z",
+   "last_missing": "2026-11-27T21:00:00.000Z",
+   "missing_bars": 93,
+   "own_bars": 3
   }
  },
  "mode": "paper",
- "pid": 527,
+ "pid": 259,
  "running": true,
  "shield": {
   "books": {
@@ -164,7 +164,7 @@
     "blocks_today": 0,
     "blocks_total": 0,
     "consecutive_losses": 0,
-    "day": "2026-11-25",
+    "day": "2026-11-27",
     "last_block": null,
     "sod_equity": 1000.0
    },
@@ -172,7 +172,7 @@
     "blocks_today": 0,
     "blocks_total": 0,
     "consecutive_losses": 0,
-    "day": "2026-11-25",
+    "day": "2026-11-27",
     "last_block": null,
     "sod_equity": 1000.0
    },
@@ -180,7 +180,7 @@
     "blocks_today": 0,
     "blocks_total": 0,
     "consecutive_losses": 0,
-    "day": "2026-11-25",
+    "day": "2026-11-27",
     "last_block": null,
     "sod_equity": 1000.0
    }
@@ -191,7 +191,7 @@
   "healthy_since": null,
   "needs_human": false
  },
- "started": "2026-11-25T01:57:02.093Z",
+ "started": "2026-11-27T22:08:07.677Z",
  "strategies": {
   "leader": {
    "needs": {},
@@ -239,6 +239,6 @@
    "event_ms": 0
   }
  },
- "ts": "2026-11-25T01:57:03.537Z",
- "ts_ms": 1795571823537
+ "ts": "2026-11-27T22:08:08.965Z",
+ "ts_ms": 1795817288965
 }
