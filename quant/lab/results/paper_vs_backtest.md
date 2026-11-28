@@ -7,3 +7,4 @@
 | 2026-11-23 03:50 | 0 | n/a | Bot still WARMING (history gap now about 25 h) and down between watchdog checks; no trades.csv. |
 | 2026-11-24 03:50 | 0 | n/a | Bot still WARMING (history gap about 26 h) and down between watchdog checks; no trades.csv. |
 | 2026-11-27 | Lab catch-up: no closed paper trades in bot/logs/trades.csv (file absent), nothing to replay. |
+| 2026-11-28 | Lab: no closed paper trades (bot/logs/trades.csv absent), nothing to replay. |

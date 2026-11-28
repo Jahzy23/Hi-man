@@ -81,3 +81,7 @@ Reading: no new trades. The rebound took a little more from the open tsmom short
 | oi_confirmed_breakout (rank 3) | ETHUSDT | 1 | +0.37% | -25.0% |
 
 Reading: no new trades in four days. Still 6 trades in total, too few to judge.
+
+## Run 2026-11-28 03:50 UTC: window unchanged (archive still ends 2026-11-26 23:00)
+
+Numbers are the same as the 2026-11-27 22:20 run: tsmom ETH +1.62% / SOL +1.51%, week_range_breakout_volume ETH 0.00% / SOL -0.51%, oi_confirmed_breakout BTC +1.35% / ETH +0.37%. Still 6 trades in total.
