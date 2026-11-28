@@ -1,7 +1,7 @@
 {
  "generated_by": "research/ranking.py",
  "data_source": "https://data.binance.vision/data/futures/um",
- "data_fetched_at_utc": "2026-11-27T22:08:26.728842+00:00",
+ "data_fetched_at_utc": "2026-11-28T01:54:06.180138+00:00",
  "as_of_utc": "2026-11-27 00:00:00+00:00",
  "regime_rule": {
   "volatile": "RV7 percentile vs trailing 365d >= 80.0",

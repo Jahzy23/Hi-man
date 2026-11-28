@@ -1,7 +1,7 @@
 # Market ranking - BTCUSDT / ETHUSDT / SOLUSDT (Binance USDT-M perps)
 
 - **Data timestamp:** last 1h bar opens 2026-11-26 23:00:00+00:00 and closes **2026-11-27 00:00:00+00:00**. Daily figures use complete UTC days up to 2026-11-26.
-- **Source:** https://data.binance.vision/data/futures/um (official Binance public archive), fetched 2026-11-27T22:08:26.728842+00:00, loaded only through `strategies.data.load`. Produced by `research/ranking.py`.
+- **Source:** https://data.binance.vision/data/futures/um (official Binance public archive), fetched 2026-11-28T01:54:06.180138+00:00, loaded only through `strategies.data.load`. Produced by `research/ranking.py`.
 - **Funding is stale:** the funding archive ends **2026-10-31 16:00:00+00:00**, 26.3 days before the last candle. Every funding figure below is as of that date, NOT as of the last bar. Do not read it as current.
 - **Open interest** is cleaned before use: hours where the archive prints 0 are dropped and a trailing 3h median removes one-bar partial prints (zero-OI hours in the archive: BTCUSDT 0, ETHUSDT 0, SOLUSDT 0).
 - Descriptive statistics only. Nothing here is a forecast and no P&L was computed.

@@ -163,3 +163,9 @@ except where our own candles confirm the price.
 - A Vietnamese headline "Bitcoin price today, November 26: reversal, sharp decrease" gives no year and no price, so it is not used. Source: https://news.laodong.vn/tien-te-dau-tu/gia-bitcoin-hom-nay-2611-dao-chieu-giam-manh-1616016.ldo
 - Other results were for November 2025 and are ignored.
 - Live feed at 2026-11-27 22:08 UTC (Binance websocket, bot snapshot): BTC 59,699.6 / ETH 1,658.81 / SOL 71.64.
+
+## Radar nightly scan, run 2026-11-28 01:55 UTC
+
+- One web search ("crypto market bitcoin ether November 27 2026"). It found no dated coverage of 26-27 Nov 2026. The newest dated 2026 items were from May-June, too old to use. An undated Coindesk roundup is ignored because it has no date.
+- Live feed (bot snapshot) at ~01:55 UTC: last tick 2.5s ago   BTCUSDT 60168.1/60168.2 (2.5s)  ETHUSDT 1668.8/1668.81 (2.7s)  SOLUSDT 72.13/72.14 (2.7s)
+- The data.binance.vision archive did not advance since the last run (klines still end 2026-11-26 23:00).
