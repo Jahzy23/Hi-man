@@ -1,42 +1,42 @@
 {
  "files": {
   "logs/decisions.jsonl": {
-   "bytes": 572056,
-   "lines": 1511,
-   "sha256": "b212893de063cfca76f6bd447f9e5d3d551d766abbde1faa9ac8827c5a1428f1"
+   "bytes": 581830,
+   "lines": 1536,
+   "sha256": "3211de650a15b14295f76ab1403826b020660a0e574674ec3df0b69029e07487"
   },
   "state/bars/BTCUSDT_1h.csv": {
-   "bytes": 576,
-   "sha256": "18bef53f024aa018a6cda1279bccb2073e49b6dfe978a5ec99c6442bfc979e24"
+   "bytes": 725,
+   "sha256": "3b6ab3097496e96f435e99f656b33346c549624036eb8400674c9a2269dc2df5"
   },
   "state/bars/ETHUSDT_1h.csv": {
-   "bytes": 585,
-   "sha256": "3d8b8c07a8dd110ac02b4bcf08fac0a68b3c76e04e58a3611165875fc650df5f"
+   "bytes": 736,
+   "sha256": "85ee22225c558df2284c34cb1e38d0a4962e9ec2baf2d0e352389fe25317d110"
   },
   "state/bars/SOLUSDT_1h.csv": {
-   "bytes": 545,
-   "sha256": "8431ec38c13a8e12c334d68a842f0fe5f12a360105e5180a4a72dd40b649b126"
+   "bytes": 686,
+   "sha256": "bbebd7f9d2595a53b9a5bf3a511cfce4a1f3f88d2e9cee2bf903de6dd6e5d61f"
   },
   "state/books.json": {
    "bytes": 1454,
    "sha256": "40a49f72045d30eebc4ca07e273215754038e29ccae7315566d4fb37afbcfbb5"
   },
   "state/market.json": {
-   "bytes": 752,
-   "sha256": "2edffb30e184fcb2d47909d5b340207e325175e885f0702d969da73f44cf9634"
+   "bytes": 765,
+   "sha256": "ae9fa64f62c40e132ca68169cfcb890b3fd2d542099cfb8285e7c75cd54909d1"
   },
   "state/shield.json": {
    "bytes": 659,
    "sha256": "e4e40d21677f1d7996155428e189c42c5c405ace96030727a785b7fdbf59936f"
   },
   "state/status.json": {
-   "bytes": 4815,
-   "sha256": "99c4bb262fbfd2a1fe3626311fea21d8fdc7488e7a9d19b117585b1d936c85f0"
+   "bytes": 4828,
+   "sha256": "d614c3dbe78db64eb2f11e1d3cc15c908189733f61a0003b1017192d6c970bc9"
   }
  },
  "format": 1,
  "restore": "python3 bot/snapshot.py --restore   (only into an empty bot/state and bot/logs)",
- "taken_at": "2026-11-28T01:54:07.640Z",
- "taken_at_ms": 1795830847640,
+ "taken_at": "2026-11-28T02:06:53.736Z",
+ "taken_at_ms": 1795831613736,
  "what": "minimal durable state of the paper bot (see bot/snapshot.py)"
 }
