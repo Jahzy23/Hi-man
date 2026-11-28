@@ -59,9 +59,9 @@
  "counters": {
   "bars": 0,
   "decisions": 0,
-  "klines": 3066,
-  "marks": 1777,
-  "ticks": 5159
+  "klines": 0,
+  "marks": 0,
+  "ticks": 0
  },
  "feed": {
   "market": {
@@ -70,7 +70,7 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 2423
+   "messages": 6
   },
   "market-b": {
    "bad_messages": 0,
@@ -78,7 +78,7 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 2421
+   "messages": 6
   },
   "public": {
    "bad_messages": 0,
@@ -86,77 +86,77 @@
    "connects": 1,
    "errors": 0,
    "last_error": "",
-   "messages": 189052
+   "messages": 53
   },
-  "queue": 1
+  "queue": 20
  },
  "filters_verified": false,
  "funding": {
   "BTCUSDT": {
-   "last_mark": 59641.31418116,
-   "last_r": 7.158e-05,
-   "last_r_e_ms": 1795817585000,
-   "next_ms": 1795824000000,
-   "settled_ms": 1795593600000,
+   "last_mark": 59691.5694078,
+   "last_r": 7.252e-05,
+   "last_r_e_ms": 1795817970000,
+   "next_ms": null,
+   "settled_ms": 1795824000000,
    "settled_observed": false,
    "settled_rate": null,
-   "watch_from_ms": 1795817289001
+   "watch_from_ms": null
   },
   "ETHUSDT": {
-   "last_mark": 1657.8093876,
-   "last_r": 6.593e-05,
-   "last_r_e_ms": 1795817584000,
-   "next_ms": 1795824000000,
-   "settled_ms": 1795593600000,
+   "last_mark": 1657.58694066,
+   "last_r": 6.692e-05,
+   "last_r_e_ms": 1795817970000,
+   "next_ms": null,
+   "settled_ms": 1795824000000,
    "settled_observed": false,
    "settled_rate": null,
-   "watch_from_ms": 1795817289001
+   "watch_from_ms": null
   },
   "SOLUSDT": {
-   "last_mark": 71.58,
-   "last_r": 3.695e-05,
-   "last_r_e_ms": 1795817584000,
-   "next_ms": 1795824000000,
-   "settled_ms": 1795593600000,
+   "last_mark": 71.50849646,
+   "last_r": 4.013e-05,
+   "last_r_e_ms": 1795817970000,
+   "next_ms": null,
+   "settled_ms": 1795824000000,
    "settled_observed": false,
    "settled_rate": null,
-   "watch_from_ms": 1795817289001
+   "watch_from_ms": null
   }
  },
  "history": {
   "BTCUSDT": {
    "archive_mismatches": 0,
    "bars": 37896,
-   "base_last_bar": "2026-11-23T23:00:00.000Z",
+   "base_last_bar": "2026-11-26T23:00:00.000Z",
    "first_missing": "2026-11-27T00:00:00.000Z",
    "last_bar": "2026-11-26T23:00:00.000Z",
-   "last_missing": "2026-11-27T21:00:00.000Z",
-   "missing_bars": 22,
+   "last_missing": "2026-11-27T23:00:00.000Z",
+   "missing_bars": 24,
    "own_bars": 3
   },
   "ETHUSDT": {
    "archive_mismatches": 0,
    "bars": 37896,
-   "base_last_bar": "2026-11-23T23:00:00.000Z",
+   "base_last_bar": "2026-11-26T23:00:00.000Z",
    "first_missing": "2026-11-27T00:00:00.000Z",
    "last_bar": "2026-11-26T23:00:00.000Z",
-   "last_missing": "2026-11-27T21:00:00.000Z",
-   "missing_bars": 22,
+   "last_missing": "2026-11-27T23:00:00.000Z",
+   "missing_bars": 24,
    "own_bars": 3
   },
   "SOLUSDT": {
    "archive_mismatches": 0,
    "bars": 37896,
-   "base_last_bar": "2026-11-23T23:00:00.000Z",
+   "base_last_bar": "2026-11-26T23:00:00.000Z",
    "first_missing": "2026-11-27T00:00:00.000Z",
    "last_bar": "2026-11-26T23:00:00.000Z",
-   "last_missing": "2026-11-27T21:00:00.000Z",
-   "missing_bars": 22,
+   "last_missing": "2026-11-27T23:00:00.000Z",
+   "missing_bars": 24,
    "own_bars": 3
   }
  },
  "mode": "paper",
- "pid": 259,
+ "pid": 246,
  "running": true,
  "shield": {
   "books": {
@@ -164,7 +164,7 @@
     "blocks_today": 0,
     "blocks_total": 0,
     "consecutive_losses": 0,
-    "day": "2026-11-27",
+    "day": "2026-11-28",
     "last_block": null,
     "sod_equity": 1000.0
    },
@@ -172,7 +172,7 @@
     "blocks_today": 0,
     "blocks_total": 0,
     "consecutive_losses": 0,
-    "day": "2026-11-27",
+    "day": "2026-11-28",
     "last_block": null,
     "sod_equity": 1000.0
    },
@@ -180,7 +180,7 @@
     "blocks_today": 0,
     "blocks_total": 0,
     "consecutive_losses": 0,
-    "day": "2026-11-27",
+    "day": "2026-11-28",
     "last_block": null,
     "sod_equity": 1000.0
    }
@@ -191,7 +191,7 @@
   "healthy_since": null,
   "needs_human": false
  },
- "started": "2026-11-27T22:08:07.677Z",
+ "started": "2026-11-28T00:06:45.160Z",
  "strategies": {
   "leader": {
    "needs": {},
@@ -221,24 +221,24 @@
  },
  "ticks": {
   "BTCUSDT": {
-   "age_s": 0.14,
-   "ask": 59644.3,
-   "bid": 59644.2,
-   "event_ms": 1795817585014
+   "age_s": null,
+   "ask": 0.0,
+   "bid": 0.0,
+   "event_ms": 0
   },
   "ETHUSDT": {
-   "age_s": 0.33,
-   "ask": 1657.69,
-   "bid": 1657.68,
-   "event_ms": 1795817584820
+   "age_s": null,
+   "ask": 0.0,
+   "bid": 0.0,
+   "event_ms": 0
   },
   "SOLUSDT": {
-   "age_s": 0.21,
-   "ask": 71.54,
-   "bid": 71.53,
-   "event_ms": 1795817584936
+   "age_s": null,
+   "ask": 0.0,
+   "bid": 0.0,
+   "event_ms": 0
   }
  },
- "ts": "2026-11-27T22:13:05.150Z",
- "ts_ms": 1795817585150
+ "ts": "2026-11-28T00:06:46.412Z",
+ "ts_ms": 1795824406412
 }
